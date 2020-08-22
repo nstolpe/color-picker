@@ -12,14 +12,8 @@
     "url": "https://github.com/nstolpe/color-picker"
   },
   "dependencies": {
-    "@babel/cli": "^7.10.5",
-    "@babel/preset-env": "^7.11.0",
-    "@babel/preset-react": "^7.10.4",
     "@emotion/core": "^10.0.35",
     "@emotion/styled": "^10.0.27",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
     "chroma-js": "^2.1.0",
     "cross-env": "^7.0.2",
     "prop-types": "^15.7.2"
@@ -50,7 +44,10 @@
     ]
   },
   "devDependencies": {
+    "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0",
+    "@babel/preset-react": "^7.10.4",
     "@storybook/addon-actions": "^6.0.13",
     "@storybook/addon-essentials": "^6.0.13",
     "@storybook/addon-links": "^6.0.13",
@@ -58,6 +55,9 @@
     "@storybook/node-logger": "^6.0.13",
     "@storybook/preset-create-react-app": "^3.1.4",
     "@storybook/react": "^6.0.13",
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
     "babel-loader": "^8.1.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
