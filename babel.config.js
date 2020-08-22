@@ -3,11 +3,15 @@
 module.exports = api => {
   api.cache(true);
 
-  const presets = [ "@babel/preset-env", "@babel/preset-react" ];
-  const plugins = [ "macros" ];
+  const presets = [
+    '@babel/preset-env',
+    '@babel/preset-react',
+    'minify',
+  ];
+  const plugins = ['macros'];
 
   return {
     presets,
-    plugins
+    plugins,
   };
 };
