@@ -1,14 +1,11 @@
 // src/components/ColorPicker.jsx
 import PropTypes from 'prop-types';
-import React, {
-  useEffect,
-  useState,
-} from 'react';
+import React from 'react';
 import chroma from 'chroma-js';
 
 import ContentWrapper from 'components/ContentWrapper';
 import Modal from 'components/Modal';
-import Store, { setActiveColor, StoreContext } from 'store/Store';
+import Store from 'store/Store';
 import ColorInputs from 'components/ColorInputs';
 import Trigger from 'components/Trigger';
 import InitializeWrapper from 'components/InitializeWrapper';

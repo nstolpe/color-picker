@@ -8,7 +8,7 @@ import chroma from 'chroma-js';
 
 import { canvasCrosshair } from 'constants/cursors';
 import {
-  setActiveColor,
+  setHue,
   useStoreContext,
 } from 'store/Store';
 
@@ -31,7 +31,7 @@ const HueCanvas = ({
   onColorChange,
 }) => {
   const {
-    activeColor,
+    color,
     dispatch,
   } = useStoreContext();
   const [isDragging, setIsDragging] = useState(false);
@@ -51,9 +51,9 @@ const HueCanvas = ({
     if (isDragging) {
       const ratio = height / 360;
       const hue = event.nativeEvent.offsetY / ratio;
-      const color = chroma({ h: hue, s: activeColor.get('hsv.s'), v: activeColor.get('hsv.v') });
-      dispatch(setActiveColor(color));
-      onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
+      const nextColor = chroma.hsv(hue, color.s, color.v);
+      dispatch(setHue(hue));
+      onColorChange({ r: nextColor.get('rgb.r'), g: nextColor.get('rgb.g'), b: nextColor.get('rgb.b') });
     }
   };
 
@@ -64,9 +64,9 @@ const HueCanvas = ({
     if (isDragging) {
       const ratio = height / 360;
       const hue = event.nativeEvent.offsetY / ratio;
-      const color = chroma({ h: hue, s: activeColor.get('hsv.s'), v: activeColor.get('hsv.v') });
-      dispatch(setActiveColor(color));
-      onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
+      const nextColor = chroma.hsv(hue, color.s, color.v);
+      dispatch(setHue(hue));
+      onColorChange({ r: nextColor.get('rgb.r'), g: nextColor.get('rgb.g'), b: nextColor.get('rgb.b') });
       setIsDragging(false);
     }
   };
@@ -81,13 +81,14 @@ const HueCanvas = ({
 
         for (let row = 0; row < height; row++) {
           const ratioRow = row / ratio;
-          const color = chroma({ h: ratioRow, s: 1, l: 0.5 });
-          const activeHue = activeColor.get('hsv.h') || 0;
-          ctx.fillStyle = color.hex();
+          const rowColor = chroma({ h: ratioRow, s: 1, l: 0.5 });
+          const { h: hue } = color;
 
-          // if this is the active row indicate it.
-          if (activeHue >= ratioRow && activeHue < ratioRow + (1 / ratio)) {
-            const inverse = chroma(0xffffff - parseInt(color.hex().replace('#', ''), 16));
+          ctx.fillStyle = rowColor.hex();
+
+          // if the hue in state is in this row, indicate it.
+          if (hue >= ratioRow && hue < ratioRow + (1 / ratio)) {
+            const inverse = chroma(0xffffff - parseInt(rowColor.hex().replace('#', ''), 16));
             ctx.fillStyle = inverse.hex();
           }
 
@@ -95,7 +96,7 @@ const HueCanvas = ({
         }
       }
     }
-  }, [activeColor, height, width]);
+  }, [color, height, width]);
 
   return (
     <SlideCanvas ref={canvas} width={width} height={height}

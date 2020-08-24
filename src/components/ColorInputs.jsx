@@ -2,6 +2,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from '@emotion/styled/macro';
+import chroma from 'chroma-js';
 
 import { useStoreContext } from 'store/Store';
 
@@ -53,10 +54,11 @@ const ColorInputs = ({
   labelFontFamily,
 }) => {
   const {
-    activeColor,
+    color: { h, s, v },
     isActive,
     isModalDragging,
   } = useStoreContext();
+  const color = chroma.hsv(h, s, v);
 
   return (
     <ValuesWrapper>
@@ -64,7 +66,7 @@ const ColorInputs = ({
         <ValueSpan fontFamily={labelFontFamily}>rgb:</ValueSpan>
         <Input
           type="text"
-          value={`${activeColor.get('rgb.r')}/${activeColor.get('rgb.g')}/${activeColor.get('rgb.b')}`}
+          value={`${color.get('rgb.r')}/${color.get('rgb.g')}/${color.get('rgb.b')}`}
           disabled={isActive && !isModalDragging ? false : true}
         />
       </ValueLabel>
@@ -72,7 +74,7 @@ const ColorInputs = ({
         <ValueSpan fontFamily={labelFontFamily}>hsv:</ValueSpan>
         <Input
           type="text"
-          value={`${Math.round((activeColor.get('hsv.h') || 0) * 100) / 100}/${Math.round(activeColor.get('hsv.s') * 100) / 100}/${Math.round(activeColor.get('hsv.v') * 100) / 100}`}
+          value={`${Math.round((color.get('hsv.h') || 0) * 100) / 100}/${Math.round(color.get('hsv.s') * 100) / 100}/${Math.round(color.get('hsv.v') * 100) / 100}`}
           readOnly
           disabled={isActive && !isModalDragging ? false : true}
         />
@@ -81,7 +83,7 @@ const ColorInputs = ({
         <ValueSpan fontFamily={labelFontFamily}>hex:</ValueSpan>
         <Input
           type="text"
-          value={activeColor.hex().replace('#', '')}
+          value={color.hex().replace('#', '')}
           readOnly
           disabled={isActive && !isModalDragging ? false : true}
         />

@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import chroma from 'chroma-js';
 
+window.chroma = chroma;
 /**
  * Wraps chroma in try/catch.
  * @TODO Should go to a utility
@@ -26,6 +27,7 @@ const color = source => {
 
 const initialState = {
   activeColor: color(0xffffff),
+  color: { h: 0, s: 0, v: 0 },
   isActive: false,
   isModalDragging: false,
   modalElement: null,
@@ -36,6 +38,10 @@ export const StoreContext = createContext();
 export const useStoreContext = () => useContext(StoreContext);
 
 const SET_ACTIVE_COLOR = 'SET_ACTIVE_COLOR';
+const SET_COLOR = 'SET_COLOR';
+const SET_HUE = 'SET_HUE';
+const SET_SATURATION = 'SET_SATURATION';
+const SET_VALUE = 'SET_VALUE';
 const SET_IS_ACTIVE = 'SET_IS_ACTIVE';
 const SET_IS_MODAL_DRAGGING = 'SET_IS_MODAL_DRAGGING';
 const SET_MODAL_ELEMENT = 'SET_MODAL_ELEMENT';
@@ -44,6 +50,26 @@ const SET_TRIGGER_ELEMENT = 'SET_TRIGGER_ELEMENT';
 export const setActiveColor = activeColor => ({
   type: SET_ACTIVE_COLOR,
   data: { activeColor: color(activeColor) },
+});
+
+export const setColor = (h, s, l) => ({
+  type: SET_COLOR,
+  data: { color: { h, s, l } },
+});
+
+export const setHue = h => ({
+  type: SET_HUE,
+  data: { h },
+});
+
+export const setValue = v => ({
+  type: SET_VALUE,
+  data: { v },
+});
+
+export const setSaturation = s => ({
+  type: SET_SATURATION,
+  data: { s },
 });
 
 export const setIsActive = isActive => ({
@@ -74,12 +100,48 @@ const reducer = (state, action) => {
       return {
         ...state,
         activeColor: data.activeColor,
-      }
+      };
+    case SET_COLOR:
+      return {
+        ...state,
+        color: {
+          ...(state.color || {}),
+          ...Object.entries(data.color || {}).reduce(
+            (components, [component, value]) =>
+              value != null && !Number.isNaN(value) ? { ...components, [component]: value } : components,
+            {}
+          ),
+        },
+      };
+    case SET_HUE:
+      return {
+        ...state,
+        color: {
+          ...state.color,
+          h: data.h,
+        },
+      };
+    case SET_SATURATION:
+      return {
+        ...state,
+        color: {
+          ...state.color,
+          s: data.s,
+        },
+      };
+    case SET_VALUE:
+      return {
+        ...state,
+        color: {
+          ...state.color,
+          v: data.v,
+        },
+      };
     case SET_IS_ACTIVE:
       return {
         ...state,
         isActive: data.isActive,
-      }
+      };
     case SET_IS_MODAL_DRAGGING:
       return {
         ...state,

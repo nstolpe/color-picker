@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useCallback } from 'react';
 import styled from '@emotion/styled/macro';
 import isPropValid from '@emotion/is-prop-valid'
+import chroma from 'chroma-js';
 
 import {
   setIsActive,
@@ -81,7 +82,7 @@ const Trigger = ({
   title,
 }) => {
   const {
-    activeColor,
+    color,
     isActive,
     modalElement,
     dispatch,
@@ -138,7 +139,7 @@ const Trigger = ({
   return (
     <TriggerButton
       active={isActive}
-      backgroundColor={activeColor.hex()}
+      backgroundColor={chroma(color).hex()}
       onClick={toggleActive}
       ref={triggerRefCallback}
       title={title}

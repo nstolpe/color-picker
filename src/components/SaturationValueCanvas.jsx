@@ -8,7 +8,8 @@ import chroma from 'chroma-js';
 
 import { canvasCrosshair } from 'constants/cursors';
 import {
-  setActiveColor,
+  setSaturation,
+  setValue,
   useStoreContext,
 } from 'store/Store';
 
@@ -30,7 +31,7 @@ const SaturationValueCanvas = ({
   onColorChange,
 }) => {
   const {
-    activeColor,
+    color,
     dispatch,
   } = useStoreContext();
   const [isDragging, setIsDragging] = useState(false);
@@ -40,14 +41,15 @@ const SaturationValueCanvas = ({
 
    */
   const handleUpdateColorFromCoordinates = ({ x, y }) => {
-    const h = activeColor.get('hsv.h') || 0;
+    const { h } = color;
     const s = x / width;
     const v = 1 - (y / height);
 
-    const color = chroma({ h, s, v });
+    const nextColor = chroma({ h, s, v });
 
-    dispatch(setActiveColor(color));
-    onColorChange({ r: color.get('rgb.r'), g: color.get('rgb.g'), b: color.get('rgb.b') });
+    dispatch(setSaturation(s));
+    dispatch(setValue(v));
+    onColorChange({ r: nextColor.get('rgb.r'), g: nextColor.get('rgb.g'), b: nextColor.get('rgb.b') });
   };
 
   const handlePointerDown = event => {
@@ -84,13 +86,11 @@ const SaturationValueCanvas = ({
       const ctx = cnvs.getContext('2d');
       const saturationGradient = ctx.createLinearGradient(0, 0, width, 0);
       const valueGradient = ctx.createLinearGradient(0, 0, 0, height);
-      const h = activeColor.get('hsv.h') || 0;
-      const s = activeColor.get('hsv.s');
-      const v = activeColor.get('hsv.v');
+      const { h, s, v } = color;
 
       // only need the hue for the background hex.
-      const color = chroma({ h: h, s: 1, v: 1 });
-      const hex = color.hex();
+      const nextColor = chroma({ h: h, s: 1, v: 1 });
+      const hex = nextColor.hex();
       // get x from saturation and y from value.
       const x = s * width;
       const y = v * height;
@@ -120,7 +120,7 @@ const SaturationValueCanvas = ({
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, 1, 1);
 
-      // ensure the pixel at `width - 1`, `0` is the activeColor hue, the gradient
+      // ensure the pixel at `width - 1`, `0` is the hue, the gradient
       // might have overwriten it.
       ctx.fillStyle = hex;
       ctx.fillRect(width - 1, 0, 1, 1);
@@ -152,7 +152,7 @@ const SaturationValueCanvas = ({
       ctx.fillStyle = colGradient;
       ctx.fillRect(x, 0, 1, height);
     }
-  }, [activeColor, height, width]);
+  }, [color, height, width]);
 
   return (
     <PadCanvas ref={canvas} width={width} height={height}
