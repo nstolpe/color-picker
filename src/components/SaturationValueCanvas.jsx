@@ -6,20 +6,20 @@ import React, {
 import styled from '@emotion/styled/macro';
 import chroma from 'chroma-js';
 
-import { canvasCrosshair } from 'constants/cursors';
 import {
   setSaturation,
   setValue,
   useStoreContext,
 } from 'store/Store';
+import { clamp } from 'components/HueCanvas';
 
 const PadCanvas = styled.canvas`
   display: inline-block;
   width: ${({ width }) => `${width}px`};
   height: ${({ height }) => `${height}px`};
   vertical-align: middle;
-  cursor: ${({ isDragging }) => isDragging ? 'none' : canvasCrosshair};
-  pointer-events: auto;
+  cursor: none;
+  pointer-events: ${({ isActive }) => isActive ? 'auto' : 'none'};
   touch-action: none;
 `;
 
@@ -33,12 +33,13 @@ const SaturationValueCanvas = ({
   const {
     color,
     dispatch,
+    isActive,
   } = useStoreContext();
   const [isDragging, setIsDragging] = useState(false);
+  const [hoverCoords, setHoverCoords] = useState(null);
 
   /**
    * Updates the color in state and calls the color change callback.
-
    */
   const handleUpdateColorFromCoordinates = ({ x, y }) => {
     const { h } = color;
@@ -53,33 +54,48 @@ const SaturationValueCanvas = ({
   };
 
   const handlePointerDown = event => {
+    const { pointerId, target } = event;
     event.preventDefault();
     event.stopPropagation();
+    target.setPointerCapture(pointerId);
     setIsDragging(true);
   }
 
   const handlePointerMove = event => {
+    const { nativeEvent: { offsetX: x, offsetY: y } } = event;
     event.preventDefault();
     event.stopPropagation();
 
+    setHoverCoords({
+      x: Math.floor(x),
+      y: Math.floor(y),
+    });
+
     if (isDragging) {
-      const { nativeEvent: { offsetX: x, offsetY: y } } = event;
-      handleUpdateColorFromCoordinates({ x, y });
+      handleUpdateColorFromCoordinates({
+        x: clamp(x, 0, width - 1),
+        y: clamp(y, 0, height - 1),
+      });
     }
   };
 
   const handlePointerUp = event => {
+    const { pointerId, target } = event;
     event.preventDefault();
     event.stopPropagation();
+    target.releasePointerCapture(pointerId);
 
     if (isDragging) {
       const { nativeEvent: { offsetX: x, offsetY: y } } = event;
-      handleUpdateColorFromCoordinates({ x, y });
+      handleUpdateColorFromCoordinates({
+        x: clamp(x, 0, width - 1),
+        y: clamp(y, 0, height - 1),
+      });
       setIsDragging(false);
     }
   };
 
-  const handlePointerLeave = event => setIsDragging(false);
+  const handlePointerLeave = event => setHoverCoords(null);
 
   const canvas = useCallback(cnvs => {
     if (cnvs && width > 0 && height > 0) {
@@ -94,7 +110,6 @@ const SaturationValueCanvas = ({
       // get x from saturation and y from value.
       const x = s * width;
       const y = v * height;
-
       ctx.clearRect(0, 0, width, height);
 
       // saturation gradient: white-to-transparent, left-to-right
@@ -128,6 +143,42 @@ const SaturationValueCanvas = ({
       /**
        * draw the cursor
        */
+       // @TODO this is the hover cursor. move to its own function.
+      if (hoverCoords && !isDragging) {
+        const topPixel = ctx.getImageData(hoverCoords.x, hoverCoords.y - 8, 1, 1).data;
+        const bottomPixel = ctx.getImageData(hoverCoords.x, hoverCoords.y + 8, 1, 1).data;
+        const leftPixel = ctx.getImageData(hoverCoords.x - 8, hoverCoords.y, 1, 1).data;
+        const rightPixel = ctx.getImageData(hoverCoords.x + 8, hoverCoords.y, 1, 1).data;
+
+        const verticalGradient = ctx.createLinearGradient(x, y - 8, x, y + 8);
+        const horizontalGradient = ctx.createLinearGradient(x - 8, y, x + 8, y);
+
+        const horizontalStart = chroma(leftPixel[0], leftPixel[1], leftPixel[2])
+          .brighten(2)
+          .desaturate(1);
+        const horizontalEnd = chroma(rightPixel[0], rightPixel[1], rightPixel[2])
+          .brighten(2)
+          .desaturate(1);
+        const verticalStart = chroma(topPixel[0], topPixel[1], topPixel[2])
+          .brighten(2)
+          .desaturate(1);
+        const verticalEnd = chroma(bottomPixel[0], bottomPixel[1], bottomPixel[2])
+          .brighten(2)
+          .desaturate(1);
+
+        verticalGradient.addColorStop(0, `${verticalStart.hex()}`);
+        verticalGradient.addColorStop(1, `${verticalEnd.hex()}`);
+
+        horizontalGradient.addColorStop(0, `${horizontalStart.hex()}`);
+        horizontalGradient.addColorStop(1, `${horizontalEnd.hex()}`);
+
+        ctx.fillStyle = verticalGradient;
+        ctx.fillRect(hoverCoords.x, hoverCoords.y - 8, 1, 17);
+
+        ctx.fillStyle = horizontalGradient;
+        ctx.fillRect(hoverCoords.x - 8, hoverCoords.y, 17, 1);
+      }
+
       // get first and last pixels on row and column
       const rowFirst = ctx.getImageData(0, height - y, 1, 1).data;
       const rowLast = ctx.getImageData(width - 1, height - y, 1, 1).data;
@@ -152,10 +203,11 @@ const SaturationValueCanvas = ({
       ctx.fillStyle = colGradient;
       ctx.fillRect(x, 0, 1, height);
     }
-  }, [color, height, width]);
+  }, [color, hoverCoords, isDragging, height, width]);
 
   return (
     <PadCanvas ref={canvas} width={width} height={height}
+      isActive={isActive}
       onPointerDown={handlePointerDown}
       onPointerLeave={handlePointerLeave}
       onPointerMove={handlePointerMove}

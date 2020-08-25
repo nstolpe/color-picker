@@ -1,7 +1,6 @@
 // src/components/ColorPicker.jsx
 import PropTypes from 'prop-types';
 import React from 'react';
-import chroma from 'chroma-js';
 
 import ContentWrapper from 'components/ContentWrapper';
 import Modal from 'components/Modal';

@@ -4,29 +4,8 @@ import React, {
   useReducer,
   useContext,
 } from 'react';
-import chroma from 'chroma-js';
-
-window.chroma = chroma;
-/**
- * Wraps chroma in try/catch.
- * @TODO Should go to a utility
- * @param {any} source  The source for the color. Anything (string, number, chroma instance, etc) that
- *                      is valid to pass to `chroma` will return the color it evaluates to. Anything
- *                      that will error returns an instance of chroma set to black/0x000000
- * @return {object}     A chroma instance.
- */
-const color = source => {
-  let c;
-  try {
-    c = chroma(source);
-  } catch (e) {
-    c = chroma(0x000000);
-  }
-  return c;
-};
 
 const initialState = {
-  activeColor: color(0xffffff),
   color: { h: 0, s: 0, v: 0 },
   isActive: false,
   isModalDragging: false,
@@ -37,7 +16,6 @@ const initialState = {
 export const StoreContext = createContext();
 export const useStoreContext = () => useContext(StoreContext);
 
-const SET_ACTIVE_COLOR = 'SET_ACTIVE_COLOR';
 const SET_COLOR = 'SET_COLOR';
 const SET_HUE = 'SET_HUE';
 const SET_SATURATION = 'SET_SATURATION';
@@ -47,14 +25,9 @@ const SET_IS_MODAL_DRAGGING = 'SET_IS_MODAL_DRAGGING';
 const SET_MODAL_ELEMENT = 'SET_MODAL_ELEMENT';
 const SET_TRIGGER_ELEMENT = 'SET_TRIGGER_ELEMENT';
 
-export const setActiveColor = activeColor => ({
-  type: SET_ACTIVE_COLOR,
-  data: { activeColor: color(activeColor) },
-});
-
-export const setColor = (h, s, l) => ({
+export const setColor = (h, s, v) => ({
   type: SET_COLOR,
-  data: { color: { h, s, l } },
+  data: { color: { h, s, v } },
 });
 
 export const setHue = h => ({
@@ -62,14 +35,14 @@ export const setHue = h => ({
   data: { h },
 });
 
-export const setValue = v => ({
-  type: SET_VALUE,
-  data: { v },
-});
-
 export const setSaturation = s => ({
   type: SET_SATURATION,
   data: { s },
+});
+
+export const setValue = v => ({
+  type: SET_VALUE,
+  data: { v },
 });
 
 export const setIsActive = isActive => ({
@@ -96,11 +69,6 @@ const reducer = (state, action) => {
   const { data, type } = action;
 
   switch (type) {
-    case SET_ACTIVE_COLOR:
-      return {
-        ...state,
-        activeColor: data.activeColor,
-      };
     case SET_COLOR:
       return {
         ...state,

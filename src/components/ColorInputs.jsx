@@ -74,7 +74,7 @@ const ColorInputs = ({
         <ValueSpan fontFamily={labelFontFamily}>hsv:</ValueSpan>
         <Input
           type="text"
-          value={`${Math.round((color.get('hsv.h') || 0) * 100) / 100}/${Math.round(color.get('hsv.s') * 100) / 100}/${Math.round(color.get('hsv.v') * 100) / 100}`}
+          value={`${Math.round(h * 100) / 100}/${Math.round(s * 100) / 100}/${Math.round(v * 100) / 100}`}
           readOnly
           disabled={isActive && !isModalDragging ? false : true}
         />

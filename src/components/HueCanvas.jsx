@@ -6,7 +6,6 @@ import React, {
 import styled from '@emotion/styled/macro';
 import chroma from 'chroma-js';
 
-import { canvasCrosshair } from 'constants/cursors';
 import {
   setHue,
   useStoreContext,
@@ -17,13 +16,17 @@ const SlideCanvas = styled.canvas`
   width: ${({ width }) => `${width}px`};
   height: ${({ height }) => `${height}px`};
   vertical-align: middle;
-  cursor: ${({ isDragging }) => isDragging ? 'none' : canvasCrosshair};
+  cursor: none;
   margin: ${({ width }) => `0 ${width * .25}px`};
-  pointer-events: auto;
+  pointer-events: ${({ isActive }) => isActive ? 'auto' : 'none'};
   touch-action: none;
+  // flip it so 0 is bottom and 360 is top
+  transform: rotate(180deg);
 `;
 
 SlideCanvas.displayName = 'SlideCanvas';
+
+export const clamp = (n, min, max) => n > max ? max : n < min ? min : n;
 
 const HueCanvas = ({
   height,
@@ -33,73 +36,85 @@ const HueCanvas = ({
   const {
     color,
     dispatch,
+    isActive,
   } = useStoreContext();
   const [isDragging, setIsDragging] = useState(false);
+  const [verticalHoverCoord, setVerticalHoverCoord] = useState(undefined);
 
-  const handlePointerDown = event => {
-    event.preventDefault();
-    event.stopPropagation();
-    setIsDragging(true);
+  const handleDragUpdate = event => {
+    const ratio = 360 / height;
+    const hue = clamp(event.nativeEvent.offsetY * ratio, 0, 359);
+    const nextColor = chroma.hsv(hue, color.s, color.v);
+    dispatch(setHue(hue));
+    onColorChange({ r: nextColor.get('rgb.r'), g: nextColor.get('rgb.g'), b: nextColor.get('rgb.b') });
   };
 
-  const handlePointerLeave = event => setIsDragging(false);
+  const handlePointerDown = event => {
+    const { pointerId, target } = event;
+    event.preventDefault();
+    event.stopPropagation();
+    target.setPointerCapture(pointerId);
+    setIsDragging(true);
+  };
 
   const handlePointerMove = event => {
     event.preventDefault();
     event.stopPropagation();
 
+    setVerticalHoverCoord(Math.floor(event.nativeEvent.offsetY));
+
     if (isDragging) {
-      const ratio = height / 360;
-      const hue = event.nativeEvent.offsetY / ratio;
-      const nextColor = chroma.hsv(hue, color.s, color.v);
-      dispatch(setHue(hue));
-      onColorChange({ r: nextColor.get('rgb.r'), g: nextColor.get('rgb.g'), b: nextColor.get('rgb.b') });
+      handleDragUpdate(event);
     }
   };
 
   const handlePointerUp = event => {
+    const { pointerId, target } = event;
     event.preventDefault();
     event.stopPropagation();
+    target.releasePointerCapture(pointerId);
 
     if (isDragging) {
-      const ratio = height / 360;
-      const hue = event.nativeEvent.offsetY / ratio;
-      const nextColor = chroma.hsv(hue, color.s, color.v);
-      dispatch(setHue(hue));
-      onColorChange({ r: nextColor.get('rgb.r'), g: nextColor.get('rgb.g'), b: nextColor.get('rgb.b') });
+      handleDragUpdate(event);
       setIsDragging(false);
     }
   };
+
+  const handlePointerLeave = () => setVerticalHoverCoord(undefined);
 
   const canvas = useCallback(cnvs => {
     if (cnvs) {
       const ctx = cnvs.getContext('2d');
 
       if (width > 0 && height > 0) {
-        const ratio = height / 360;
+        const ratio =  360 / height;
         ctx.clearRect(0, 0, width, height);
 
         for (let row = 0; row < height; row++) {
-          const ratioRow = row / ratio;
-          const rowColor = chroma({ h: ratioRow, s: 1, l: 0.5 });
+          const scaledHue = row * ratio;
+          const rowColor = chroma({ h: scaledHue, s: 1, l: 0.5 });
           const { h: hue } = color;
 
           ctx.fillStyle = rowColor.hex();
 
           // if the hue in state is in this row, indicate it.
-          if (hue >= ratioRow && hue < ratioRow + (1 / ratio)) {
+          if (hue >= scaledHue && hue < scaledHue + ratio) {
             const inverse = chroma(0xffffff - parseInt(rowColor.hex().replace('#', ''), 16));
             ctx.fillStyle = inverse.hex();
+          } else if (row >= verticalHoverCoord && row < verticalHoverCoord + ratio) {
+            const inverse = chroma(0xffffff - parseInt(rowColor.hex().replace('#', ''), 16));
+            ctx.fillStyle = inverse.brighten(2).desaturate(1).hex();
           }
 
-          ctx.fillRect(0, Math.ceil(row), width, Math.ceil(row));
+          ctx.fillRect(0, row, width, 1);
         }
       }
     }
-  }, [color, height, width]);
+  }, [color, verticalHoverCoord, height, width]);
 
   return (
     <SlideCanvas ref={canvas} width={width} height={height}
+      isActive={isActive}
       onPointerDown={handlePointerDown}
       onPointerLeave={handlePointerLeave}
       onPointerMove={handlePointerMove}
