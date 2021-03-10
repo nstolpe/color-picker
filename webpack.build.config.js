@@ -62,6 +62,10 @@ module.exports = (env = {}) => {
       modules: [path.resolve(__dirname, 'src'), 'node_modules'],
     },
     externals: [nodeExternals()],
+    // externals: {
+    //   'react': 'React',
+    //   'react-dom': 'ReactDOM',
+    // },
     plugins: [],
     devtool: 'source-map',
   };
