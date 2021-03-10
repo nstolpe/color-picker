@@ -5,10 +5,13 @@ import styled from '@emotion/styled/macro';
 import isPropValid from '@emotion/is-prop-valid'
 import chroma from 'chroma-js';
 
+import withSelector from 'components/withSelector';
+
 import {
   setIsActive,
   setTriggerElement,
-  useStoreContext,
+  useDispatch,
+  StoreContext,
 } from 'store/Store';
 
 export const Button = styled.button`
@@ -78,15 +81,43 @@ TriggerButton.defaultProps = {
   title: 'Trigger',
 };
 
+const selector = ({
+  color,
+  isActive,
+  modalElement,
+}) => ({
+  color,
+  isActive,
+  modalElement,
+});
+
+const comparator = ({
+  color,
+  isActive,
+  modalElement,
+}, {
+  color: oldColor,
+  isActive: oldIsActive,
+  modalElement: oldModalElement,
+}) => {
+  if (
+    isActive !== oldIsActive ||
+    modalElement !== oldModalElement ||
+    color?.h !== oldColor?.h ||
+    color?.s !== oldColor?.s ||
+    color?.v !== oldColor?.v
+  ) {
+    return false;
+  }
+};
+
 const Trigger = ({
+  color,
+  isActive,
+  modalElement,
   title,
 }) => {
-  const {
-    color,
-    isActive,
-    modalElement,
-    dispatch,
-  } = useStoreContext();
+  const dispatch = useDispatch();
   const toggleActive = event => {
     event.stopPropagation();
     dispatch(setIsActive(!isActive));
@@ -145,5 +176,6 @@ const Trigger = ({
       title={title}
     />
   );
-}
-export default Trigger;
+};
+
+export default withSelector(StoreContext, selector, comparator)(Trigger);

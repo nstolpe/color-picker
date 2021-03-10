@@ -9,8 +9,10 @@ import chroma from 'chroma-js';
 import {
   setSaturation,
   setValue,
-  useStoreContext,
+  useDispatch,
+  StoreContext,
 } from 'store/Store';
+import withSelector from 'components/withSelector';
 import { clamp } from 'components/HueCanvas';
 
 const PadCanvas = styled.canvas`
@@ -25,16 +27,39 @@ const PadCanvas = styled.canvas`
 
 PadCanvas.displayName = 'PadCanvas';
 
+const selector = ({
+  color,
+  isActive,
+}) => ({
+  color,
+  isActive,
+});
+
+const comparator = ({
+  color,
+  isActive,
+}, {
+  color: oldColor,
+  isActive: oldIsActive,
+}) => {
+  if (
+    isActive !== oldIsActive ||
+    color?.h !== oldColor?.h ||
+    color?.s !== oldColor?.s ||
+    color?.v !== oldColor?.v
+  ) {
+    return false;
+  }
+};
+
 const SaturationValueCanvas = ({
+  color,
+  isActive,
   height,
   width,
   onColorChange,
 }) => {
-  const {
-    color,
-    dispatch,
-    isActive,
-  } = useStoreContext();
+  const dispatch = useDispatch();
   const [isDragging, setIsDragging] = useState(false);
   const [hoverCoords, setHoverCoords] = useState(null);
 
@@ -217,4 +242,4 @@ const SaturationValueCanvas = ({
   );
 };
 
-export default SaturationValueCanvas;
+export default withSelector(StoreContext, selector, comparator)(SaturationValueCanvas);

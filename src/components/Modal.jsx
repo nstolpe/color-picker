@@ -7,10 +7,12 @@ import React, {
 import { createPortal } from 'react-dom';
 import styled from '@emotion/styled/macro';
 
+import withSelector from 'components/withSelector';
 import {
   setIsModalDragging,
   setModalElement,
-  useStoreContext,
+  useDispatch,
+  StoreContext,
 } from 'store/Store';
 
 const Panel = styled.div`
@@ -62,12 +64,8 @@ const throttle = (handler, wait=100) => {
   };
 };
 
-const usePanelHooks = () => {
-  const {
-    dispatch,
-    modalElement,
-    triggerElement,
-} = useStoreContext();
+const usePanelHooks = (modalElement, triggerElement) => {
+  const dispatch = useDispatch();
   const [panelLeft, setPanelLeft] = useState(null);
   const [panelTop, setPanelTop] = useState(null);
   const [panelInteractionCoordinates, setPanelInteractionCoordinates] = useState();
@@ -116,11 +114,24 @@ const usePanelHooks = () => {
   };
 };
 
+const selector = ({
+  isActive,
+  modalElement,
+  triggerElement,
+}) => ({
+  isActive,
+  modalElement,
+  triggerElement,
+});
+
 const Modal = ({
   children,
   container,
+  isActive,
+  modalElement,
   title,
   titleFontFamily,
+  triggerElement,
 }) => {
   const {
     panelLeft,
@@ -129,8 +140,7 @@ const Modal = ({
     pointerDown,
     pointerMove,
     pointerUp,
-  } = usePanelHooks();
-  const { isActive } = useStoreContext();
+  } = usePanelHooks(modalElement, triggerElement);
 
   return createPortal(
     <Panel
@@ -163,4 +173,4 @@ Modal.propTypes = {
   titleFontFamily: PropTypes.string,
 };
 
-export default Modal;
+export default withSelector(StoreContext, selector)(Modal);

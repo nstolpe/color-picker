@@ -15,6 +15,8 @@ const initialState = {
 
 export const StoreContext = createContext();
 export const useStoreContext = () => useContext(StoreContext);
+export const DispatchContext = createContext();
+export const useDispatch = () => useContext(DispatchContext);
 
 const SET_COLOR = 'SET_COLOR';
 const SET_HUE = 'SET_HUE';
@@ -133,11 +135,12 @@ const reducer = (state, action) => {
 
 const Store = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  window.state = state;
   return (
-    <StoreContext.Provider value={{ ...state, dispatch }}>
-      {children}
-    </StoreContext.Provider>
+    <DispatchContext.Provider value={dispatch}>
+      <StoreContext.Provider value={{ ...state, dispatch }}>
+        {children}
+      </StoreContext.Provider>
+    </DispatchContext.Provider>
   );
 };
 

@@ -4,7 +4,8 @@ import React from 'react';
 import styled from '@emotion/styled/macro';
 import chroma from 'chroma-js';
 
-import { useStoreContext } from 'store/Store';
+import { StoreContext } from 'store/Store';
+import withSelector from 'components/withSelector';
 
 const ValuesWrapper = styled.div`
   display: flex;
@@ -50,14 +51,42 @@ const Input = styled.input`
 
 Input.displayName = 'Input';
 
+const selector = ({
+  color,
+  isActive,
+  isModalDragging,
+}) => ({
+  color,
+  isActive,
+  isModalDragging,
+});
+
+const comparator = ({
+  color,
+  isActive,
+  isModalDragging,
+}, {
+  color: oldColor,
+  isActive: oldIsActive,
+  isModalDragging: oldIsModalDragging,
+}) => {
+  if (
+    isActive !== oldIsActive ||
+    isModalDragging !== oldIsModalDragging ||
+    color?.h !== oldColor?.h ||
+    color?.s !== oldColor?.s ||
+    color?.v !== oldColor?.v
+  ) {
+    return false;
+  }
+};
+
 const ColorInputs = ({
+  color: { h, s, v } = {},
+  isActive,
+  isModalDragging,
   labelFontFamily,
 }) => {
-  const {
-    color: { h, s, v },
-    isActive,
-    isModalDragging,
-  } = useStoreContext();
   const color = chroma.hsv(h, s, v);
 
   return (
@@ -100,4 +129,4 @@ ColorInputs.defaultProps = {
   labelFontFamily: 'sans-serif',
 };
 
-export default ColorInputs;
+export default withSelector(StoreContext, selector, comparator)(ColorInputs);

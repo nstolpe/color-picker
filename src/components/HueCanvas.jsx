@@ -8,8 +8,10 @@ import chroma from 'chroma-js';
 
 import {
   setHue,
-  useStoreContext,
+  useDispatch,
+  StoreContext,
 } from 'store/Store';
+import withSelector from 'components/withSelector';
 
 const SlideCanvas = styled.canvas`
   display: inline-block;
@@ -28,16 +30,39 @@ SlideCanvas.displayName = 'SlideCanvas';
 
 export const clamp = (n, min, max) => n > max ? max : n < min ? min : n;
 
+const selector = ({
+  color,
+  isActive,
+}) => ({
+  color,
+  isActive,
+});
+
+const comparator = ({
+  color,
+  isActive,
+}, {
+  color: oldColor,
+  isActive: oldIsActive,
+}) => {
+  if (
+    isActive !== oldIsActive ||
+    color?.h !== oldColor?.h ||
+    color?.s !== oldColor?.s ||
+    color?.v !== oldColor?.v
+  ) {
+    return false;
+  }
+};
+
 const HueCanvas = ({
+  color,
+  isActive,
   height,
   width,
   onColorChange,
 }) => {
-  const {
-    color,
-    dispatch,
-    isActive,
-  } = useStoreContext();
+  const dispatch = useDispatch()
   const [isDragging, setIsDragging] = useState(false);
   const [verticalHoverCoord, setVerticalHoverCoord] = useState(undefined);
 
@@ -124,4 +149,4 @@ const HueCanvas = ({
   );
 };
 
-export default HueCanvas;
+export default withSelector(StoreContext, selector, comparator)(HueCanvas);

@@ -3,7 +3,7 @@ import styled from '@emotion/styled/macro';
 import React, { useEffect } from 'react';
 import chroma from 'chroma-js';
 
-import { setColor, useStoreContext } from 'store/Store';
+import { setColor, useDispatch } from 'store/Store';
 
 const Wrapper = styled.div`
   display: inline-block;
@@ -20,7 +20,7 @@ const hsvObject = color => {
 };
 
 const InitializeWrapper = ({ children, initialColor }) => {
-  const { dispatch } = useStoreContext();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const color = hsvObject(initialColor);
