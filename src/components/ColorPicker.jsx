@@ -18,6 +18,8 @@ const ColorPicker = ({
   padHeight,
   slideWidth,
   slideHeight,
+  triggerWidth,
+  triggerHeight,
   title,
   titleFontFamily,
   onColorChange,
@@ -27,6 +29,8 @@ const ColorPicker = ({
       <InitializeWrapper initialColor={initialColor}>
         <Trigger
           title={title}
+          width={triggerWidth}
+          height={triggerHeight}
         />
         {modalContainerElement &&
           <Modal
@@ -61,6 +65,8 @@ ColorPicker.defaultProps = {
   padHeight: 256,
   slideWidth: 48,
   slideHeight: 256,
+  triggerWidth: '6.4em',
+  triggerHeight: '6.4em',
   title: 'Color Picker',
   titleFontFamily: 'sans-serif',
   valueFontFamily: 'sans-serif',
@@ -74,6 +80,8 @@ ColorPicker.propTypes = {
   padHeight: PropTypes.number,
   slideWidth: PropTypes.number,
   slideHeight: PropTypes.number,
+  triggerWidth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  triggerHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   title: PropTypes.string,
   titleFontFamily: PropTypes.string,
   valueFontFamily: PropTypes.string,

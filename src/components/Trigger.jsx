@@ -95,13 +95,19 @@ const comparator = ({
   color,
   isActive,
   modalElement,
+  height,
+  width,
 }, {
   color: oldColor,
   isActive: oldIsActive,
   modalElement: oldModalElement,
+  height: oldHeight,
+  width: oldWidth,
 }) => {
   if (
     isActive !== oldIsActive ||
+    height !== oldHeight,
+    width !== oldWidth,
     modalElement !== oldModalElement ||
     color?.h !== oldColor?.h ||
     color?.s !== oldColor?.s ||
@@ -116,6 +122,8 @@ const Trigger = ({
   isActive,
   modalElement,
   title,
+  height,
+  width,
 }) => {
   const dispatch = useDispatch();
   const toggleActive = event => {
@@ -174,8 +182,28 @@ const Trigger = ({
       onClick={toggleActive}
       ref={triggerRefCallback}
       title={title}
+      height={height}
+      width={width}
     />
   );
 };
+
+Trigger.propTypes = {
+  color: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  isActive: PropTypes.bool,
+  modalElement: PropTypes.object.isRequired,
+  title: PropTypes.string,
+  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+};
+
+Trigger.defaultProps = {
+  color: 0xffffff,
+  isActive: false,
+  title: '',
+  height: '5.6em',
+  width: '5.6em',
+};
+
 
 export default withSelector(StoreContext, selector, comparator)(Trigger);
