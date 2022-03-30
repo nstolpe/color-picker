@@ -106,8 +106,8 @@ const comparator = ({
 }) => {
   if (
     isActive !== oldIsActive ||
-    height !== oldHeight,
-    width !== oldWidth,
+    height !== oldHeight ||
+    width !== oldWidth ||
     modalElement !== oldModalElement ||
     color?.h !== oldColor?.h ||
     color?.s !== oldColor?.s ||
@@ -189,9 +189,52 @@ const Trigger = ({
 };
 
 Trigger.propTypes = {
-  color: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  color: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.shape({
+      r: PropTypes.number,
+      g: PropTypes.number,
+      b: PropTypes.number,
+    }),
+    PropTypes.shape({
+      h: PropTypes.number,
+      s: PropTypes.number,
+      v: PropTypes.number,
+    }),
+    PropTypes.shape({
+      h: PropTypes.number,
+      s: PropTypes.number,
+      l: PropTypes.number,
+    }),
+    PropTypes.shape({
+      l: PropTypes.number,
+      a: PropTypes.number,
+      b: PropTypes.number,
+    }),
+    PropTypes.shape({
+      o: PropTypes.number,
+      k: PropTypes.number,
+      l: PropTypes.number,
+      a: PropTypes.number,
+      b: PropTypes.number,
+    }),
+    PropTypes.shape({
+      l: PropTypes.number,
+      c: PropTypes.number,
+      h: PropTypes.number,
+    }),
+    PropTypes.shape({
+      o: PropTypes.number,
+      k: PropTypes.number,
+      l: PropTypes.number,
+      c: PropTypes.number,
+      h: PropTypes.number,
+    }),
+    // @TODO add more chroma constructors, or simplify this (just PropTypes.object instead of all the shapes?).
+  ]),
   isActive: PropTypes.bool,
-  modalElement: PropTypes.object.isRequired,
+  modalElement: PropTypes.object,
   title: PropTypes.string,
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
