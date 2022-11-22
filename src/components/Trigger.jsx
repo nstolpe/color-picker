@@ -1,18 +1,13 @@
 // src/components/Trigger.jsx
+import React from 'react';
 import PropTypes from 'prop-types';
-import React, { useCallback } from 'react';
 import styled from '@emotion/styled/macro';
-import isPropValid from '@emotion/is-prop-valid'
+import isPropValid from '@emotion/is-prop-valid';
 import chroma from 'chroma-js';
 
-import withSelector from 'components/withSelector';
+import withSelector from 'Components/withSelector';
 
-import {
-  setIsActive,
-  setTriggerElement,
-  useDispatch,
-  StoreContext,
-} from 'store/Store';
+import { setIsActive, setTriggerElement, StoreContext } from 'Store/Store';
 
 export const Button = styled.button`
   outline: none;
@@ -32,45 +27,29 @@ export const Button = styled.button`
 
 Button.displayName = Button;
 
-const TriggerButton = styled(
-  Button,
-  {
-    shouldForwardProp: prop => isPropValid(prop) && prop !== 'height' && prop !== 'width'
-  }
-)(
-  ({
-    active,
-    backgroundColor,
-    height,
-    width,
-  }) => ({
-    backgroundColor,
-    height,
-    width,
-    boxShadow: active ? '0 0 10px rgba(0,0,0,0.5) inset' : 'none',
-    borderRadius: '4px',
-    boxSizing: 'border-box',
-    cursor: 'pointer',
-    display: 'block',
-    position: 'relative',
-    textDecoration: 'none',
-    transition: 'box-shadow 0.15s ease-in-out',
-    verticalAlign: 'middle',
-  })
-);
+const TriggerButton = styled(Button, {
+  shouldForwardProp: (prop) =>
+    isPropValid(prop) && prop !== 'height' && prop !== 'width',
+})(({ active, backgroundColor, height, width }) => ({
+  backgroundColor,
+  height,
+  width,
+  boxShadow: active ? '0 0 10px rgba(0,0,0,0.5) inset' : 'none',
+  borderRadius: '4px',
+  boxSizing: 'border-box',
+  cursor: 'pointer',
+  display: 'block',
+  position: 'relative',
+  textDecoration: 'none',
+  transition: 'box-shadow 0.15s ease-in-out',
+  verticalAlign: 'middle',
+}));
 
-TriggerButton.propTypes ={
+TriggerButton.propTypes = {
   active: PropTypes.bool,
   backgroundColor: PropTypes.string,
-  height: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-  ]),
-  width:  PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-  ]),
-  title: PropTypes.string,
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 TriggerButton.defaultProps = {
@@ -78,37 +57,41 @@ TriggerButton.defaultProps = {
   backgroundColor: '#ffffff',
   height: '5.6em',
   width: '5.6em',
-  title: 'Trigger',
 };
 
 const selector = ({
   color,
   isActive,
   modalElement,
+  triggerElement,
+  dispatch,
 }) => ({
   color,
   isActive,
   modalElement,
+  triggerElement,
+  dispatch,
 });
 
-const comparator = ({
-  color,
-  isActive,
-  modalElement,
-  height,
-  width,
-}, {
-  color: oldColor,
-  isActive: oldIsActive,
-  modalElement: oldModalElement,
-  height: oldHeight,
-  width: oldWidth,
-}) => {
+const comparator = (
+  { color, isActive, modalElement, triggerElement, dispatch, height, width },
+  {
+    color: oldColor,
+    isActive: oldIsActive,
+    modalElement: oldModalElement,
+    triggerElement: oldTriggerElement,
+    dispatch: oldDispatch,
+    height: oldHeight,
+    width: oldWidth,
+  }
+) => {
   if (
     isActive !== oldIsActive ||
     height !== oldHeight ||
     width !== oldWidth ||
     modalElement !== oldModalElement ||
+    triggerElement !== oldTriggerElement ||
+    dispatch !== oldDispatch ||
     color?.h !== oldColor?.h ||
     color?.s !== oldColor?.s ||
     color?.v !== oldColor?.v
@@ -117,76 +100,78 @@ const comparator = ({
   }
 };
 
-const Trigger = ({
-  color,
-  isActive,
-  modalElement,
-  title,
-  height,
-  width,
-}) => {
-  const dispatch = useDispatch();
-  const toggleActive = event => {
+class Trigger extends React.Component {
+  triggerRef = React.createRef();
+
+  toggleActive = (event) => {
+    const { dispatch, isActive } = this.props;
+
     event.stopPropagation();
     dispatch(setIsActive(!isActive));
   };
-  const triggerRefCallback = useCallback(trigger => {
-    dispatch(setTriggerElement(trigger))
-    /**
-     * close the picker when anything outside of the trigger receives a pointerdown
-     * or when escape is pressed
-     * @TODO confirm this is the best way to handle escape
-     */
-    const close = event => {
-      const { type, target, key, keyCode } = event;
-      // const panel = trigger.nextElementSibling;
-      let doClose = false;
 
-      switch (type) {
-        case 'keydown':
-          if (isActive && (key === 'Escape' || key === 'Esc' || keyCode === 27)) {
-            doClose = true;
-          }
-          break;
-        case 'pointerdown':
-          if (isActive && target !== trigger && (!modalElement || !modalElement.contains(target))) {
-            doClose = true;
-          }
-          break;
-        default:
-          break;
-      }
+  close = (event) => {
+    const { current: trigger } = this.triggerRef;
+    const { dispatch, isActive, modalElement } = this.props;
+    const { type, target, key, keyCode } = event;
+    let doClose = false;
 
-      if (doClose) {
-        dispatch(setIsActive(false));
-        document.removeEventListener('keydown', close);
-        document.removeEventListener('pointerdown', close);
-      }
-    };
-
-    if (trigger && isActive) {
-      document.addEventListener('keydown', close);
-      document.addEventListener('pointerdown', close);
+    switch (type) {
+      case 'keydown':
+        if (isActive && (key === 'Escape' || key === 'Esc' || keyCode === 27)) {
+          doClose = true;
+        }
+        break;
+      case 'pointerdown':
+        if (
+          isActive &&
+          target !== trigger &&
+          (!modalElement || !modalElement.contains(target))
+        ) {
+          doClose = true;
+        }
+        break;
+      default:
+        break;
     }
 
-    return () => {
+    if (doClose) {
+      dispatch(setIsActive(false));
       document.removeEventListener('keydown', close);
       document.removeEventListener('pointerdown', close);
-    };
-  }, [dispatch, isActive, modalElement]);
+    }
+  };
 
-  return (
-    <TriggerButton
-      active={isActive}
-      backgroundColor={chroma(color).hex()}
-      onClick={toggleActive}
-      ref={triggerRefCallback}
-      title={title}
-      height={height}
-      width={width}
-    />
-  );
-};
+  componentDidMount() {
+    const { dispatch } = this.props;
+    const { current: trigger } = this.triggerRef;
+
+    dispatch(setTriggerElement(trigger));
+    document.addEventListener('keydown', this.close);
+    document.addEventListener('pointerdown', this.close);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.close);
+    document.removeEventListener('pointerdown', this.close);
+  }
+
+  render() {
+    const { isActive, color, title, height, width } = this.props;
+
+    return (
+      <TriggerButton
+        active={isActive}
+        backgroundColor={chroma(color).hex()}
+        onClick={this.toggleActive}
+        ref={this.triggerRef}
+        title={title}
+        height={height}
+        width={width}
+      />
+    );
+  }
+}
 
 Trigger.propTypes = {
   color: PropTypes.oneOfType([
@@ -238,6 +223,7 @@ Trigger.propTypes = {
   title: PropTypes.string,
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  dispatch: PropTypes.func,
 };
 
 Trigger.defaultProps = {
@@ -247,6 +233,5 @@ Trigger.defaultProps = {
   height: '5.6em',
   width: '5.6em',
 };
-
 
 export default withSelector(StoreContext, selector, comparator)(Trigger);
