@@ -1,9 +1,6 @@
 // src/store/Store.js
-import React, {
-  createContext,
-  useReducer,
-  useContext,
-} from 'react';
+import React, { createContext, useReducer, useContext } from 'react';
+import PropTypes from 'prop-types';
 
 const initialState = {
   color: { h: 0, s: 0, v: 0 },
@@ -32,37 +29,37 @@ export const setColor = (h, s, v) => ({
   data: { color: { h, s, v } },
 });
 
-export const setHue = h => ({
+export const setHue = (h) => ({
   type: SET_HUE,
   data: { h },
 });
 
-export const setSaturation = s => ({
+export const setSaturation = (s) => ({
   type: SET_SATURATION,
   data: { s },
 });
 
-export const setValue = v => ({
+export const setValue = (v) => ({
   type: SET_VALUE,
   data: { v },
 });
 
-export const setIsActive = isActive => ({
+export const setIsActive = (isActive) => ({
   type: SET_IS_ACTIVE,
   data: { isActive },
 });
 
-export const setIsModalDragging = isModalDragging => ({
+export const setIsModalDragging = (isModalDragging) => ({
   type: SET_IS_MODAL_DRAGGING,
   data: { isModalDragging },
 });
 
-export const setModalElement = modalElement => ({
+export const setModalElement = (modalElement) => ({
   type: SET_MODAL_ELEMENT,
   data: { modalElement },
 });
 
-export const setTriggerElement = triggerElement => ({
+export const setTriggerElement = (triggerElement) => ({
   type: SET_TRIGGER_ELEMENT,
   data: { triggerElement },
 });
@@ -78,7 +75,9 @@ const reducer = (state, action) => {
           ...(state.color || {}),
           ...Object.entries(data.color || {}).reduce(
             (components, [component, value]) =>
-              value != null && !Number.isNaN(value) ? { ...components, [component]: value } : components,
+              value != null && !Number.isNaN(value)
+                ? { ...components, [component]: value }
+                : components,
             {}
           ),
         },
@@ -142,6 +141,10 @@ const Store = ({ children }) => {
       </StoreContext.Provider>
     </DispatchContext.Provider>
   );
+};
+
+Store.propTypes = {
+  children: PropTypes.node,
 };
 
 export default Store;

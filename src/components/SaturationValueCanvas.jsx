@@ -11,9 +11,9 @@ import {
   setValue,
   useDispatch,
   StoreContext,
-} from 'store/Store';
-import withSelector from 'components/withSelector';
-import { clamp } from 'components/HueCanvas';
+} from 'Store/Store';
+import withSelector from 'Components/withSelector';
+import { clamp } from 'Components/HueCanvas';
 
 const PadCanvas = styled.canvas`
   display: inline-block;

@@ -2,14 +2,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import ContentWrapper from 'components/ContentWrapper';
-import Modal from 'components/Modal';
-import Store from 'store/Store';
-import ColorInputs from 'components/ColorInputs';
-import Trigger from 'components/Trigger';
-import InitializeWrapper from 'components/InitializeWrapper';
-import HueCanvas from 'components/HueCanvas';
-import SaturationValueCanvas from 'components/SaturationValueCanvas';
+import ContentWrapper from 'Components/ContentWrapper';
+import Modal from 'Components/Modal';
+import Store from 'Store/Store';
+import ColorInputs from 'Components/ColorInputs';
+import Trigger from 'Components/Trigger';
+import InitializeWrapper from 'Components/InitializeWrapper';
+import HueCanvas from 'Components/HueCanvas';
+import SaturationValueCanvas from 'Components/SaturationValueCanvas';
 
 const ColorPicker = ({
   modalContainerElement,
@@ -23,40 +23,34 @@ const ColorPicker = ({
   title,
   titleFontFamily,
   onColorChange,
-}) => {
-  return (
-    <Store>
-      <InitializeWrapper initialColor={initialColor}>
-        <Trigger
+}) => (
+  <Store>
+    <InitializeWrapper initialColor={initialColor}>
+      <Trigger title={title} width={triggerWidth} height={triggerHeight} />
+      {modalContainerElement && (
+        <Modal
+          container={modalContainerElement}
           title={title}
-          width={triggerWidth}
-          height={triggerHeight}
-        />
-        {modalContainerElement &&
-          <Modal
-            container={modalContainerElement}
-            title={title}
-            titleFontFamily={titleFontFamily}
-          >
-            <ContentWrapper>
-              <SaturationValueCanvas
-                width={padWidth}
-                height={padHeight}
-                onColorChange={onColorChange}
-              />
-              <HueCanvas
-                width={slideWidth}
-                height={slideHeight}
-                onColorChange={onColorChange}
-              />
-              <ColorInputs />
-            </ContentWrapper>
-          </Modal>
-        }
-      </InitializeWrapper>
-    </Store>
-  );
-};
+          titleFontFamily={titleFontFamily}
+        >
+          <ContentWrapper>
+            <SaturationValueCanvas
+              width={padWidth}
+              height={padHeight}
+              onColorChange={onColorChange}
+            />
+            <HueCanvas
+              width={slideWidth}
+              height={slideHeight}
+              onColorChange={onColorChange}
+            />
+            <ColorInputs />
+          </ContentWrapper>
+        </Modal>
+      )}
+    </InitializeWrapper>
+  </Store>
+);
 
 ColorPicker.defaultProps = {
   modalContainerElement: document.body,

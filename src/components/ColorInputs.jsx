@@ -4,8 +4,8 @@ import React from 'react';
 import styled from '@emotion/styled/macro';
 import chroma from 'chroma-js';
 
-import { StoreContext } from 'store/Store';
-import withSelector from 'components/withSelector';
+import { StoreContext } from 'Store/Store';
+import withSelector from 'Components/withSelector';
 
 const ValuesWrapper = styled.div`
   display: flex;

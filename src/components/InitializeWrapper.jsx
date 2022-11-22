@@ -3,7 +3,7 @@ import styled from '@emotion/styled/macro';
 import React, { useEffect } from 'react';
 import chroma from 'chroma-js';
 
-import { setColor, useDispatch } from 'store/Store';
+import { setColor, useDispatch } from 'Store/Store';
 
 const Wrapper = styled.div`
   display: inline-block;
@@ -11,7 +11,7 @@ const Wrapper = styled.div`
   vertical-align: middle;
 `;
 
-const hsvObject = color => {
+const hsvObject = (color) => {
   try {
     return chroma(color).hsv();
   } catch (e) {
@@ -25,9 +25,9 @@ const InitializeWrapper = ({ children, initialColor }) => {
   useEffect(() => {
     const color = hsvObject(initialColor);
     dispatch(setColor(...color));
-  }, [dispatch, initialColor])
+  }, [dispatch, initialColor]);
 
-  return <Wrapper children={children}/>;
+  return <Wrapper children={children} />;
 };
 
 export default InitializeWrapper;

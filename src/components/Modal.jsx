@@ -1,19 +1,16 @@
 // src/components/Modal.jsx
 import PropTypes from 'prop-types';
-import React, {
-  useCallback,
-  useState,
-} from 'react';
+import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import styled from '@emotion/styled/macro';
 
-import withSelector from 'components/withSelector';
+import withSelector from 'Components/withSelector';
 import {
   setIsModalDragging,
   setModalElement,
   useDispatch,
   StoreContext,
-} from 'store/Store';
+} from 'Store/Store';
 
 const Panel = styled.div`
   cursor: move;
@@ -23,24 +20,24 @@ const Panel = styled.div`
   left: 0;
   line-height: 1.5;
   position: absolute;
-  opacity: ${({ active }) => active ? 1 : 0};
-  pointer-events: ${({ active }) => active ? 'auto' : 'none'};
+  opacity: ${({ active }) => (active ? 1 : 0)};
+  pointer-events: ${({ active }) => (active ? 'auto' : 'none')};
   z-index: 1000;
   background-color: hsl(0, 0%, 75%);
   margin: 0 !important;
   padding: 1em;
   margin-bottom: 1em;
   border-radius: 4px;
-  box-shadow: 0 0 4px 0px rgba(0,0,0,0.6);
+  box-shadow: 0 0 4px 0px rgba(0, 0, 0, 0.6);
   transition: opacity 0.15s ease-in-out;
 `;
 
 Panel.displayName = 'Panel';
 
 const ModalHeader = styled.h3`
-  background-color: hsl(0,0%,25%);
+  background-color: hsl(0, 0%, 25%);
   border-radius: 4px;
-  color: hsl(0,0%,75%);
+  color: hsl(0, 0%, 75%);
   font-family: ${({ fontFamily }) => fontFamily};
   font-size: 1.25em;
   line-height: 1.2;
@@ -52,33 +49,39 @@ const ModalHeader = styled.h3`
 
 ModalHeader.displayName = 'ModalHeader';
 
-const throttle = (handler, wait=100) => {
-  let last = Date.now();
-
-  return event => {
-    const now = Date.now();
-    if (now - last >= wait) {
-      last = now;
-      handler(event);
-    }
-  };
-};
+// @TODO: think this isn't needed, but leaving it in for now cause i don't
+// feel like messing w/ this anymore.
+// const throttle = (handler, wait = 0) => {
+//   let last = Date.now();
+//
+//   return (event) => {
+//     const now = Date.now();
+//     if (now - last >= wait) {
+//       last = now;
+//       handler(event);
+//     }
+//   };
+// };
 
 const usePanelHooks = (modalElement, triggerElement) => {
   const dispatch = useDispatch();
   const [panelLeft, setPanelLeft] = useState(null);
   const [panelTop, setPanelTop] = useState(null);
-  const [panelInteractionCoordinates, setPanelInteractionCoordinates] = useState();
+  const [panelInteractionCoordinates, setPanelInteractionCoordinates] =
+    useState();
   // set the starting position for the panel and store a reference to the element
-  const panelRefCallback = useCallback(panel => {
-    if (panel !== null && triggerElement !== null) {
-      const triggerRect = triggerElement.getBoundingClientRect();
-      const panelRect = panel.getBoundingClientRect();
-      dispatch(setModalElement(panel));
-      setPanelLeft(triggerRect.x);
-      setPanelTop(triggerRect.y - panelRect.height);
-    }
-  }, [dispatch, triggerElement]);
+  const panelRefCallback = useCallback(
+    (panel) => {
+      if (panel !== null && triggerElement !== null) {
+        const triggerRect = triggerElement.getBoundingClientRect();
+        const panelRect = panel.getBoundingClientRect();
+        dispatch(setModalElement(panel));
+        setPanelLeft(triggerRect.x);
+        setPanelTop(triggerRect.y - panelRect.height);
+      }
+    },
+    [dispatch, triggerElement]
+  );
 
   const pointerDown = ({ clientX: x, clientY: y, pointerId, target }) => {
     if (target === modalElement) {
@@ -88,13 +91,13 @@ const usePanelHooks = (modalElement, triggerElement) => {
     }
   };
 
-  const pointerMove = ({ clientX: x, clientY: y}) => {
+  const pointerMove = ({ clientX: x, clientY: y }) => {
     if (panelInteractionCoordinates) {
       const leftDiff = x - panelInteractionCoordinates.x;
       const topDiff = y - panelInteractionCoordinates.y;
       setPanelInteractionCoordinates({ x, y });
-      setPanelLeft(panelLeft => (panelLeft + leftDiff));
-      setPanelTop(panelTop => (panelTop + topDiff));
+      setPanelLeft((panelLeft) => panelLeft + leftDiff);
+      setPanelTop((panelTop) => panelTop + topDiff);
     }
   };
 
@@ -114,11 +117,7 @@ const usePanelHooks = (modalElement, triggerElement) => {
   };
 };
 
-const selector = ({
-  isActive,
-  modalElement,
-  triggerElement,
-}) => ({
+const selector = ({ isActive, modalElement, triggerElement }) => ({
   isActive,
   modalElement,
   triggerElement,
@@ -147,7 +146,7 @@ const Modal = ({
       active={isActive}
       onPointerDown={pointerDown}
       onPointerUp={pointerUp}
-      onPointerMove={throttle(pointerMove)}
+      onPointerMove={pointerMove}
       left={panelLeft}
       top={panelTop}
       ref={panelRefCallback}

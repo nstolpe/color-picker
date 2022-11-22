@@ -10,8 +10,8 @@ import {
   setHue,
   useDispatch,
   StoreContext,
-} from 'store/Store';
-import withSelector from 'components/withSelector';
+} from 'Store/Store';
+import withSelector from 'Components/withSelector';
 
 const SlideCanvas = styled.canvas`
   display: inline-block;
