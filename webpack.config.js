@@ -35,6 +35,7 @@ module.exports = async () => {
       alias: {
         Components: path.resolve(__dirname, 'src/components'),
         Store: path.resolve(__dirname, 'src/store'),
+        Constants: path.resolve(__dirname, 'src/constants'),
       },
       extensions: ['.js', '.jsx', '.glsl'],
     },
