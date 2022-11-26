@@ -2,7 +2,7 @@
 import PropTypes from 'prop-types';
 import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
-import styled from '@emotion/styled/macro';
+import styled from '@emotion/styled';
 
 import withSelector from 'Components/withSelector';
 import {
@@ -31,8 +31,6 @@ const Panel = styled.div`
   box-shadow: 0 0 4px 0px rgba(0, 0, 0, 0.6);
   transition: opacity 0.15s ease-in-out;
 `;
-
-Panel.displayName = 'Panel';
 
 const ModalHeader = styled.h3`
   background-color: hsl(0, 0%, 25%);
@@ -166,8 +164,8 @@ Modal.defaultProps = {
 };
 
 Modal.propTypes = {
-  container: PropTypes.object,
   children: PropTypes.node,
+  container: PropTypes.object,
   title: PropTypes.string,
   titleFontFamily: PropTypes.string,
 };

@@ -1,16 +1,9 @@
 // src/components/HueCanvas
-import React, {
-  useCallback,
-  useState,
-} from 'react';
-import styled from '@emotion/styled/macro';
+import React, { useCallback, useState } from 'react';
+import styled from '@emotion/styled';
 import chroma from 'chroma-js';
 
-import {
-  setHue,
-  useDispatch,
-  StoreContext,
-} from 'Store/Store';
+import { setHue, useDispatch, StoreContext } from 'Store/Store';
 import withSelector from 'Components/withSelector';
 
 const SlideCanvas = styled.canvas`
@@ -19,32 +12,25 @@ const SlideCanvas = styled.canvas`
   height: ${({ height }) => `${height}px`};
   vertical-align: middle;
   cursor: none;
-  margin: ${({ width }) => `0 ${width * .25}px`};
-  pointer-events: ${({ isActive }) => isActive ? 'auto' : 'none'};
+  margin: ${({ width }) => `0 ${width * 0.25}px`};
+  pointer-events: ${({ isActive }) => (isActive ? 'auto' : 'none')};
   touch-action: none;
   // flip it so 0 is bottom and 360 is top
   transform: rotate(180deg);
 `;
 
-SlideCanvas.displayName = 'SlideCanvas';
+// @TODO: move this to a utility
+export const clamp = (n, min, max) => (n > max ? max : n < min ? min : n);
 
-export const clamp = (n, min, max) => n > max ? max : n < min ? min : n;
-
-const selector = ({
-  color,
-  isActive,
-}) => ({
+const selector = ({ color, isActive }) => ({
   color,
   isActive,
 });
 
-const comparator = ({
-  color,
-  isActive,
-}, {
-  color: oldColor,
-  isActive: oldIsActive,
-}) => {
+const comparator = (
+  { color, isActive },
+  { color: oldColor, isActive: oldIsActive }
+) => {
   if (
     isActive !== oldIsActive ||
     color?.h !== oldColor?.h ||
@@ -55,26 +41,25 @@ const comparator = ({
   }
 };
 
-const HueCanvas = ({
-  color,
-  isActive,
-  height,
-  width,
-  onColorChange,
-}) => {
-  const dispatch = useDispatch()
+// @TODO: make this a class component.
+const HueCanvas = ({ color, isActive, height, width, onColorChange }) => {
+  const dispatch = useDispatch();
   const [isDragging, setIsDragging] = useState(false);
   const [verticalHoverCoord, setVerticalHoverCoord] = useState(undefined);
 
-  const handleDragUpdate = event => {
+  const handleDragUpdate = (event) => {
     const ratio = 360 / height;
     const hue = clamp(event.nativeEvent.offsetY * ratio, 0, 359);
     const nextColor = chroma.hsv(hue, color.s, color.v);
     dispatch(setHue(hue));
-    onColorChange({ r: nextColor.get('rgb.r'), g: nextColor.get('rgb.g'), b: nextColor.get('rgb.b') });
+    onColorChange({
+      r: nextColor.get('rgb.r'),
+      g: nextColor.get('rgb.g'),
+      b: nextColor.get('rgb.b'),
+    });
   };
 
-  const handlePointerDown = event => {
+  const handlePointerDown = (event) => {
     const { pointerId, target } = event;
     event.preventDefault();
     event.stopPropagation();
@@ -82,7 +67,7 @@ const HueCanvas = ({
     setIsDragging(true);
   };
 
-  const handlePointerMove = event => {
+  const handlePointerMove = (event) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -93,7 +78,7 @@ const HueCanvas = ({
     }
   };
 
-  const handlePointerUp = event => {
+  const handlePointerUp = (event) => {
     const { pointerId, target } = event;
     event.preventDefault();
     event.stopPropagation();
@@ -107,38 +92,52 @@ const HueCanvas = ({
 
   const handlePointerLeave = () => setVerticalHoverCoord(undefined);
 
-  const canvas = useCallback(cnvs => {
-    if (cnvs) {
-      const ctx = cnvs.getContext('2d');
+  // Draws hue range.
+  const canvasRef = useCallback(
+    (canvas) => {
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
 
-      if (width > 0 && height > 0) {
-        const ratio =  360 / height;
-        ctx.clearRect(0, 0, width, height);
+        if (width > 0 && height > 0) {
+          const ratio = 360 / height;
+          ctx.clearRect(0, 0, width, height);
 
-        for (let row = 0; row < height; row++) {
-          const scaledHue = row * ratio;
-          const rowColor = chroma({ h: scaledHue, s: 1, l: 0.5 });
-          const { h: hue } = color;
+          for (let row = 0; row < height; row++) {
+            const scaledHue = row * ratio;
+            const rowColor = chroma({ h: scaledHue, s: 1, l: 0.5 });
+            const { h: hue } = color;
 
-          ctx.fillStyle = rowColor.hex();
+            ctx.fillStyle = rowColor.hex();
 
-          // if the hue in state is in this row, indicate it.
-          if (hue >= scaledHue && hue < scaledHue + ratio) {
-            const inverse = chroma(0xffffff - parseInt(rowColor.hex().replace('#', ''), 16));
-            ctx.fillStyle = inverse.hex();
-          } else if (row >= verticalHoverCoord && row < verticalHoverCoord + ratio) {
-            const inverse = chroma(0xffffff - parseInt(rowColor.hex().replace('#', ''), 16));
-            ctx.fillStyle = inverse.brighten(2).desaturate(1).hex();
+            if (hue >= scaledHue && hue < scaledHue + ratio) {
+              const inverse = chroma(
+                0xffffff - parseInt(rowColor.hex().replace('#', ''), 16)
+              );
+              ctx.fillStyle = inverse.hex();
+            } else if (
+              // If this row is the currently selected hue, highlight it.
+              row >= verticalHoverCoord &&
+              row < verticalHoverCoord + ratio
+            ) {
+              const inverse = chroma(
+                0xffffff - parseInt(rowColor.hex().replace('#', ''), 16)
+              );
+              ctx.fillStyle = inverse.brighten(2).desaturate(1).hex();
+            }
+
+            ctx.fillRect(0, row, width, 1);
           }
-
-          ctx.fillRect(0, row, width, 1);
         }
       }
-    }
-  }, [color, verticalHoverCoord, height, width]);
+    },
+    [color, verticalHoverCoord, height, width]
+  );
 
   return (
-    <SlideCanvas ref={canvas} width={width} height={height}
+    <SlideCanvas
+      ref={canvasRef}
+      width={width}
+      height={height}
       isActive={isActive}
       onPointerDown={handlePointerDown}
       onPointerLeave={handlePointerLeave}

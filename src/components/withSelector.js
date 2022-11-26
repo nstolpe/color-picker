@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { createContext, useContext, useMemo, useRef } from 'react';
 
 /**
  * Takes a `value` and `comparator` function. The `comparator`
@@ -33,7 +28,7 @@ export const useCustomCompareMemo = (value, comparator) => {
 const defaultComparator = (values, oldValues) => {
   const entries = Object.entries(values);
 
-  for (let i = 0, l = entries.length; i < l; i ++) {
+  for (let i = 0, l = entries.length; i < l; i++) {
     const [key, value] = entries[i];
 
     if (value !== oldValues[key]) {
@@ -56,22 +51,27 @@ const defaultComparator = (values, oldValues) => {
  * @param comparator {Function}  A function that takes two arguments and compares them.
  * @param WrappedComponent {object}  A React Component
  */
-export const withSelector = (
-  context = createContext(),
-  selector = values => values,
-  comparator = defaultComparator
-) => WrappedComponent => {
-  const WrapperComponent = props => {
-    const ctx = selector(useContext(context));
-    const mergedProps = useCustomCompareMemo({ ...props, ...ctx }, comparator);
+export const withSelector =
+  (
+    context = createContext(),
+    selector = (values) => values,
+    comparator = defaultComparator
+  ) =>
+  (WrappedComponent) => {
+    const WrapperComponent = (props) => {
+      const ctx = selector(useContext(context));
+      const mergedProps = useCustomCompareMemo(
+        { ...props, ...ctx },
+        comparator
+      );
 
-    return useMemo(
-      () => <WrappedComponent {...mergedProps} />,
-      [mergedProps]
-    );
+      return useMemo(
+        () => <WrappedComponent {...mergedProps} />,
+        [mergedProps]
+      );
+    };
+
+    return WrapperComponent;
   };
-
-  return WrapperComponent;
-};
 
 export default withSelector;

@@ -1,5 +1,5 @@
 // src/components/InitializeWrapper.jsx
-import styled from '@emotion/styled/macro';
+import styled from '@emotion/styled';
 import React, { useEffect } from 'react';
 import chroma from 'chroma-js';
 

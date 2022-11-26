@@ -1,7 +1,7 @@
 // src/components/ColorInputs.jsx
 import PropTypes from 'prop-types';
 import React from 'react';
-import styled from '@emotion/styled/macro';
+import styled from '@emotion/styled';
 import chroma from 'chroma-js';
 
 import { StoreContext } from 'Store/Store';
@@ -16,8 +16,6 @@ const ValuesWrapper = styled.div`
   pointer-events: none;
 `;
 
-ValuesWrapper.displayName = 'ValuesWrapper';
-
 const ValueLabel = styled.label`
   display: flex;
   font-family: sans-serif;
@@ -27,20 +25,16 @@ const ValueLabel = styled.label`
   user-select: none;
 `;
 
-ValueLabel.displayName = 'ValueLabel';
-
 const ValueSpan = styled.span`
-  color: hsl(0,0%,25%);
+  color: hsl(0, 0%, 25%);
   font-family: ${({ fontFamily }) => fontFamily};
   margin-right: 0.5em;
 `;
 
-ValueSpan.displayName = 'ValueSpan';
-
 const Input = styled.input`
   border: 0;
   border-radius: 4px;
-  box-shadow: 0 0 4px hsl(0,0%,25%) inset;
+  box-shadow: 0 0 4px hsl(0, 0%, 25%) inset;
   box-sizing: border-box;
   cursor: text;
   font-size: 1em;
@@ -49,27 +43,20 @@ const Input = styled.input`
   width: 8em;
 `;
 
-Input.displayName = 'Input';
-
-const selector = ({
-  color,
-  isActive,
-  isModalDragging,
-}) => ({
+const selector = ({ color, isActive, isModalDragging }) => ({
   color,
   isActive,
   isModalDragging,
 });
 
-const comparator = ({
-  color,
-  isActive,
-  isModalDragging,
-}, {
-  color: oldColor,
-  isActive: oldIsActive,
-  isModalDragging: oldIsModalDragging,
-}) => {
+const comparator = (
+  { color, isActive, isModalDragging },
+  {
+    color: oldColor,
+    isActive: oldIsActive,
+    isModalDragging: oldIsModalDragging,
+  }
+) => {
   if (
     isActive !== oldIsActive ||
     isModalDragging !== oldIsModalDragging ||
@@ -95,7 +82,9 @@ const ColorInputs = ({
         <ValueSpan fontFamily={labelFontFamily}>rgb:</ValueSpan>
         <Input
           type="text"
-          value={`${color.get('rgb.r')}/${color.get('rgb.g')}/${color.get('rgb.b')}`}
+          value={`${color.get('rgb.r')}/${color.get('rgb.g')}/${color.get(
+            'rgb.b'
+          )}`}
           disabled={isActive && !isModalDragging ? false : true}
         />
       </ValueLabel>
@@ -103,7 +92,9 @@ const ColorInputs = ({
         <ValueSpan fontFamily={labelFontFamily}>hsv:</ValueSpan>
         <Input
           type="text"
-          value={`${Math.round(h * 100) / 100}/${Math.round(s * 100) / 100}/${Math.round(v * 100) / 100}`}
+          value={`${Math.round(h * 100) / 100}/${Math.round(s * 100) / 100}/${
+            Math.round(v * 100) / 100
+          }`}
           readOnly
           disabled={isActive && !isModalDragging ? false : true}
         />

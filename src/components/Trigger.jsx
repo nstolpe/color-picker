@@ -1,7 +1,7 @@
 // src/components/Trigger.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from '@emotion/styled/macro';
+import styled from '@emotion/styled';
 import isPropValid from '@emotion/is-prop-valid';
 import chroma from 'chroma-js';
 
@@ -24,8 +24,6 @@ export const Button = styled.button`
     border: 0;
   }
 `;
-
-Button.displayName = Button;
 
 const TriggerButton = styled(Button, {
   shouldForwardProp: (prop) =>

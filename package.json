@@ -17,6 +17,7 @@
     "build": "cross-env NODE_ENV=production webpack --config=webpack.build.config.js",
     "clean": "rimraf dist",
     "test": "echo You have no tests.\nWrite some.",
+    "lint": "eslint src/",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
     "prepare": "npm run build"
@@ -27,7 +28,7 @@
       "@babel/preset-react"
     ],
     "plugins": [
-      "macros"
+      "@emotion"
     ]
   },
   "browserslist": {
