@@ -1,8 +1,8 @@
 // src/components/ColorPicker.jsx
 import PropTypes from 'prop-types';
 import React from 'react';
+import styled from '@emotion/styled';
 
-import ContentWrapper from 'Components/ContentWrapper';
 import Modal from 'Components/Modal';
 import Store from 'Store/Store';
 import ColorInputs from 'Components/ColorInputs';
@@ -10,6 +10,11 @@ import Trigger from 'Components/Trigger';
 import InitializeWrapper from 'Components/InitializeWrapper';
 import HueCanvas from 'Components/HueCanvas';
 import SaturationValueCanvas from 'Components/SaturationValueCanvas';
+
+const ContentWrapper = styled.div`
+  display: flex;
+  pointer-events: none;
+`;
 
 const ColorPicker = ({
   modalContainerElement,
