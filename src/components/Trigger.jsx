@@ -5,9 +5,9 @@ import styled from '@emotion/styled';
 import isPropValid from '@emotion/is-prop-valid';
 import chroma from 'chroma-js';
 
+import { setIsActive, StoreContext } from 'Store/Store';
 import withSelector from 'Components/withSelector';
-
-import { setIsActive, setTriggerElement, StoreContext } from 'Store/Store';
+import { TRIGGER_ID, MODAL_ID } from 'Constants/element-ids';
 
 export const Button = styled.button`
   outline: none;
@@ -57,26 +57,18 @@ TriggerButton.defaultProps = {
   width: '5.6em',
 };
 
-const selector = ({
+const selector = ({ color, isActive, triggerElement, dispatch }) => ({
   color,
   isActive,
-  modalElement,
-  triggerElement,
-  dispatch,
-}) => ({
-  color,
-  isActive,
-  modalElement,
   triggerElement,
   dispatch,
 });
 
 const comparator = (
-  { color, isActive, modalElement, triggerElement, dispatch, height, width },
+  { color, isActive, triggerElement, dispatch, height, width },
   {
     color: oldColor,
     isActive: oldIsActive,
-    modalElement: oldModalElement,
     triggerElement: oldTriggerElement,
     dispatch: oldDispatch,
     height: oldHeight,
@@ -87,7 +79,6 @@ const comparator = (
     isActive !== oldIsActive ||
     height !== oldHeight ||
     width !== oldWidth ||
-    modalElement !== oldModalElement ||
     triggerElement !== oldTriggerElement ||
     dispatch !== oldDispatch ||
     color?.h !== oldColor?.h ||
@@ -110,8 +101,9 @@ class Trigger extends React.Component {
 
   close = (event) => {
     const { current: trigger } = this.triggerRef;
-    const { dispatch, isActive, modalElement } = this.props;
+    const { dispatch, isActive } = this.props;
     const { type, target, key, keyCode } = event;
+    const modalElement = document.getElementById(MODAL_ID);
     let doClose = false;
 
     switch (type) {
@@ -141,10 +133,6 @@ class Trigger extends React.Component {
   };
 
   componentDidMount() {
-    const { dispatch } = this.props;
-    const { current: trigger } = this.triggerRef;
-
-    dispatch(setTriggerElement(trigger));
     document.addEventListener('keydown', this.close);
     document.addEventListener('pointerdown', this.close);
   }
@@ -166,6 +154,7 @@ class Trigger extends React.Component {
         title={title}
         height={height}
         width={width}
+        id={TRIGGER_ID}
       />
     );
   }
@@ -217,7 +206,6 @@ Trigger.propTypes = {
     // @TODO add more chroma constructors, or simplify this (just PropTypes.object instead of all the shapes?).
   ]),
   isActive: PropTypes.bool,
-  modalElement: PropTypes.object,
   title: PropTypes.string,
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

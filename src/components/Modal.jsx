@@ -4,13 +4,9 @@ import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import styled from '@emotion/styled';
 
+import { setIsModalDragging, useDispatch, StoreContext } from 'Store/Store';
 import withSelector from 'Components/withSelector';
-import {
-  setIsModalDragging,
-  setModalElement,
-  useDispatch,
-  StoreContext,
-} from 'Store/Store';
+import { TRIGGER_ID, MODAL_ID } from 'Constants/element-ids';
 
 const Panel = styled.div`
   cursor: move;
@@ -45,43 +41,27 @@ const ModalHeader = styled.h3`
   user-select: none;
 `;
 
-ModalHeader.displayName = 'ModalHeader';
-
-// @TODO: think this isn't needed, but leaving it in for now cause i don't
-// feel like messing w/ this anymore.
-// const throttle = (handler, wait = 0) => {
-//   let last = Date.now();
-//
-//   return (event) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       handler(event);
-//     }
-//   };
-// };
-
-const usePanelHooks = (modalElement, triggerElement) => {
+const usePanelHooks = () => {
   const dispatch = useDispatch();
   const [panelLeft, setPanelLeft] = useState(null);
   const [panelTop, setPanelTop] = useState(null);
   const [panelInteractionCoordinates, setPanelInteractionCoordinates] =
     useState();
   // set the starting position for the panel and store a reference to the element
-  const panelRefCallback = useCallback(
-    (panel) => {
-      if (panel !== null && triggerElement !== null) {
-        const triggerRect = triggerElement.getBoundingClientRect();
-        const panelRect = panel.getBoundingClientRect();
-        dispatch(setModalElement(panel));
-        setPanelLeft(triggerRect.x);
-        setPanelTop(triggerRect.y - panelRect.height);
-      }
-    },
-    [dispatch, triggerElement]
-  );
+  const panelRefCallback = useCallback((panel) => {
+    const triggerElement = document.getElementById(TRIGGER_ID);
+
+    if (panel !== null && triggerElement !== null) {
+      const triggerRect = triggerElement.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      setPanelLeft(triggerRect.x);
+      setPanelTop(triggerRect.y - panelRect.height);
+    }
+  }, []);
 
   const pointerDown = ({ clientX: x, clientY: y, pointerId, target }) => {
+    const modalElement = document.getElementById(MODAL_ID);
+
     if (target === modalElement) {
       setPanelInteractionCoordinates({ x, y });
       modalElement.setPointerCapture(pointerId);
@@ -100,6 +80,8 @@ const usePanelHooks = (modalElement, triggerElement) => {
   };
 
   const pointerUp = ({ pointerId }) => {
+    const modalElement = document.getElementById(MODAL_ID);
+
     setPanelInteractionCoordinates(null);
     modalElement.releasePointerCapture(pointerId);
     dispatch(setIsModalDragging(false));
@@ -115,21 +97,12 @@ const usePanelHooks = (modalElement, triggerElement) => {
   };
 };
 
-const selector = ({ isActive, modalElement, triggerElement }) => ({
+const selector = ({ isActive }) => ({
   isActive,
-  modalElement,
-  triggerElement,
 });
 
-const Modal = ({
-  children,
-  container,
-  isActive,
-  modalElement,
-  title,
-  titleFontFamily,
-  triggerElement,
-}) => {
+// @TODO: make this into a class component, move the hooks/handlers into class properties
+const Modal = ({ children, container, isActive, title, titleFontFamily }) => {
   const {
     panelLeft,
     panelTop,
@@ -137,7 +110,7 @@ const Modal = ({
     pointerDown,
     pointerMove,
     pointerUp,
-  } = usePanelHooks(modalElement, triggerElement);
+  } = usePanelHooks();
 
   return createPortal(
     <Panel
@@ -148,6 +121,7 @@ const Modal = ({
       left={panelLeft}
       top={panelTop}
       ref={panelRefCallback}
+      id={MODAL_ID}
     >
       <ModalHeader fontFamily={titleFontFamily}>{title}</ModalHeader>
       {children}
