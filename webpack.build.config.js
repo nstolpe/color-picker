@@ -21,7 +21,7 @@ const banner =
     `${'/*'.padEnd(longest + endPadding, '*')}*\n`
   ) + `${' *'.padEnd(longest + endPadding, '*')}*/\n\n`;
 
-module.exports = (env = {}) => {
+module.exports = () => {
   const config = {
     entry: path.resolve(__dirname, 'src', 'components', 'ColorPicker.jsx'),
     output: {
@@ -48,9 +48,18 @@ module.exports = (env = {}) => {
     module: {
       rules: [
         {
-          test: /\.(js|jsx)$/,
+          test: /\.jsx?$/,
           exclude: '/node_modules/',
-          use: ['babel-loader'],
+          loader: 'babel-loader',
+        },
+        {
+          test: /\.tsx?$/,
+          exclude: '/node_modules/',
+          loader: 'babel-loader',
+        },
+        {
+          test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+          type: 'asset/resource',
         },
       ],
     },
@@ -67,10 +76,6 @@ module.exports = (env = {}) => {
         allowlist: ['chroma-js'],
       }),
     ],
-    // externals: {
-    //   'react': 'React',
-    //   'react-dom': 'ReactDOM',
-    // },
     plugins: [],
     devtool: 'source-map',
   };

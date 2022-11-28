@@ -26,6 +26,11 @@ module.exports = async () => {
           loader: 'babel-loader',
         },
         {
+          test: /\.tsx?$/,
+          exclude: '/node_modules/',
+          loader: 'babel-loader',
+        },
+        {
           test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
           type: 'asset/resource',
         },
@@ -37,7 +42,7 @@ module.exports = async () => {
         Store: path.resolve(__dirname, 'src/store'),
         Constants: path.resolve(__dirname, 'src/constants'),
       },
-      extensions: ['.js', '.jsx', '.glsl'],
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.glsl'],
     },
     plugins: [
       new HtmlWebpackPlugin({
