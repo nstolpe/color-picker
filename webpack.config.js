@@ -39,10 +39,11 @@ module.exports = async () => {
     resolve: {
       alias: {
         Components: path.resolve(__dirname, 'src/components'),
-        Store: path.resolve(__dirname, 'src/store'),
         Constants: path.resolve(__dirname, 'src/constants'),
+        Store: path.resolve(__dirname, 'src/store'),
+        Utility: path.resolve(__dirname, 'src/utility'),
       },
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.glsl'],
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
     plugins: [
       new HtmlWebpackPlugin({
