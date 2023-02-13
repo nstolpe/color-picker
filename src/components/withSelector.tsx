@@ -1,43 +1,8 @@
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
-/**
- * Takes a `value` and `comparator` function. The `comparator`
- * will be called with `value` and last different value that
- * was passed to the hook instance. If `comparator` returns
- * `false`, `value` will be override `ref.current` and will
- * be called as the second argument of `comparator` next time
- * this hook instance is called. Returns `value` or the previous
- * `value`.
- * From: https://github.com/Sanjagh/use-custom-compare-effect/blob/master/src/index.js
- *
- * @param {*} value   A value that should only change when conditions are met
- * @param {Function}  A function that takes two arguments (probably objects) and performs
- *                    a comparison on them. Returns true if the comparison finds equality
- *                    and false if it doesn't.
- */
-export const useCustomCompareMemo = (value, comparator) => {
-  const ref = useRef(value);
-
-  if (!comparator(value, ref.current)) {
-    ref.current = value;
-  }
-
-  return ref.current;
-};
-
-const defaultComparator = (values, oldValues) => {
-  const entries = Object.entries(values);
-
-  for (let i = 0, l = entries.length; i < l; i++) {
-    const [key, value] = entries[i];
-
-    if (value !== oldValues[key]) {
-      return false;
-    }
-  }
-
-  return true;
-};
+import useCustomCompareMemo, {
+  defaultComparator,
+} from 'Hooks/useCustomCompareMemo';
 
 /**
  * HOC that returns a memoized version of the wrapped component that has
@@ -53,21 +18,18 @@ const defaultComparator = (values, oldValues) => {
  */
 export const withSelector =
   (
-    context = createContext(),
-    selector = (values) => values,
-    comparator = defaultComparator
+    context: React.Context<any> = createContext(null),
+    selector: ColorPickerTypes.SelectorFn,
+    comparator: ColorPickerTypes.ComparatorFn = defaultComparator
   ) =>
-  (WrappedComponent) => {
-    const WrapperComponent = (props) => {
+  (WrappedComponent: React.ComponentType): React.ComponentType => {
+    const WrapperComponent = (props: Record<string, any>): JSX.Element => {
       const ctx = selector(useContext(context));
-      const mergedProps = useCustomCompareMemo(
-        { ...props, ...ctx },
-        comparator
-      );
+      const contextProps = useCustomCompareMemo(ctx, comparator);
 
       return useMemo(
-        () => <WrappedComponent {...mergedProps} />,
-        [mergedProps]
+        () => <WrappedComponent {...{ ...contextProps, ...props }} />,
+        [contextProps, props]
       );
     };
 
