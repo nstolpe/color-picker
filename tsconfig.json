@@ -5,7 +5,7 @@
     "lib": ["ESNext", "dom"],
     "jsx": "react",
     "noEmit": true,
-    "sourceMap": true /* Strict Type-Checking Options */,
+    "sourceMap": true,
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -13,7 +13,16 @@
     /* Module Resolution Options */
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "Components/*": ["src/components/*"],
+      "Constants/*": ["src/constants/*"],
+      "Hooks/*": ["src/hooks/*"],
+      "Store/*": ["src/store/*"],
+      "Utility/*": ["src/utility/*"]
+    }
   },
   "include": ["src"]
 }
