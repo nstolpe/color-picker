@@ -5,6 +5,7 @@ import chroma from 'chroma-js';
 
 import { setHue, useDispatch, StoreContext } from 'Store/Store';
 import withSelector from 'Components/withSelector';
+import clamp from 'Utility/clamp';
 
 const SlideCanvas = styled.canvas`
   display: inline-block;
@@ -19,30 +20,20 @@ const SlideCanvas = styled.canvas`
   transform: rotate(180deg);
 `;
 
-// @TODO: move this to a utility
-export const clamp = (n, min, max) => (n > max ? max : n < min ? min : n);
-
-const selector = ({ color, isActive }) => ({
-  color,
+const selector = ({ color: { h }, isActive }) => ({
+  h,
   isActive,
 });
 
-const comparator = (
-  { color, isActive },
-  { color: oldColor, isActive: oldIsActive }
-) => {
-  if (
-    isActive !== oldIsActive ||
-    color?.h !== oldColor?.h ||
-    color?.s !== oldColor?.s ||
-    color?.v !== oldColor?.v
-  ) {
+const comparator = ({ h, isActive }, { h: oldH, isActive: oldIsActive }) => {
+  if (isActive !== oldIsActive || h !== oldH) {
     return false;
   }
+  return true;
 };
 
 // @TODO: make this a class component.
-const HueCanvas = ({ color, isActive, height, width, onColorChange }) => {
+const HueCanvas = ({ h, isActive, height, width, onColorChange }) => {
   const dispatch = useDispatch();
   const [isDragging, setIsDragging] = useState(false);
   const [verticalHoverCoord, setVerticalHoverCoord] = useState(undefined);
@@ -50,13 +41,13 @@ const HueCanvas = ({ color, isActive, height, width, onColorChange }) => {
   const handleDragUpdate = (event) => {
     const ratio = 360 / height;
     const hue = clamp(event.nativeEvent.offsetY * ratio, 0, 359);
-    const nextColor = chroma.hsv(hue, color.s, color.v);
+    // const nextColor = chroma.hsv(hue, color.s, color.v);
     dispatch(setHue(hue));
-    onColorChange({
-      r: nextColor.get('rgb.r'),
-      g: nextColor.get('rgb.g'),
-      b: nextColor.get('rgb.b'),
-    });
+    // onColorChange({
+    //   r: nextColor.get('rgb.r'),
+    //   g: nextColor.get('rgb.g'),
+    //   b: nextColor.get('rgb.b'),
+    // });
   };
 
   const handlePointerDown = (event) => {
@@ -105,11 +96,11 @@ const HueCanvas = ({ color, isActive, height, width, onColorChange }) => {
           for (let row = 0; row < height; row++) {
             const scaledHue = row * ratio;
             const rowColor = chroma({ h: scaledHue, s: 1, l: 0.5 });
-            const { h: hue } = color;
+            // const { h: hue } = color;
 
             ctx.fillStyle = rowColor.hex();
 
-            if (hue >= scaledHue && hue < scaledHue + ratio) {
+            if (h >= scaledHue && h < scaledHue + ratio) {
               const inverse = chroma(
                 0xffffff - parseInt(rowColor.hex().replace('#', ''), 16)
               );
@@ -130,7 +121,7 @@ const HueCanvas = ({ color, isActive, height, width, onColorChange }) => {
         }
       }
     },
-    [color, verticalHoverCoord, height, width]
+    [h, verticalHoverCoord, height, width]
   );
 
   return (
@@ -148,4 +139,4 @@ const HueCanvas = ({ color, isActive, height, width, onColorChange }) => {
   );
 };
 
-export default withSelector(StoreContext, selector, comparator)(HueCanvas);
+export default withSelector(StoreContext, selector)(HueCanvas);
