@@ -1,9 +1,9 @@
-// src/components/InitializeWrapper.jsx
 import styled from '@emotion/styled';
 import React, { useEffect } from 'react';
 import chroma from 'chroma-js';
 
-import { setColor, useDispatch } from 'Store/Store';
+import { setColor, setOnColorChange, useDispatch } from 'Store/Store';
+import createHsvArray, { HsvArraySource } from 'Utility/createHsvArray';
 
 const Wrapper = styled.div`
   display: inline-block;
@@ -11,23 +11,30 @@ const Wrapper = styled.div`
   vertical-align: middle;
 `;
 
-const hsvObject = (color) => {
-  try {
-    return chroma(color).hsv();
-  } catch (e) {
-    return [0, 0, 0];
-  }
+type OnColorChangeHandler = (color: chroma.Color) => void;
+
+type InitializeWrapperProps = {
+  children: React.ReactNode;
+  initialColor: HsvArraySource;
+  onColorChange: OnColorChangeHandler;
 };
 
-const InitializeWrapper = ({ children, initialColor }) => {
+const InitializeWrapper: React.FC<InitializeWrapperProps> = ({
+  children,
+  initialColor,
+  onColorChange,
+}) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const color = hsvObject(initialColor);
-    dispatch(setColor(...color));
+    const [h, s, v]: [h: number, s: number, v: number] =
+      createHsvArray(initialColor);
+
+    dispatch(setOnColorChange(onColorChange));
+    dispatch(setColor({ h, s, v }));
   }, [dispatch, initialColor]);
 
-  return <Wrapper children={children} />;
+  return <Wrapper>{children}</Wrapper>;
 };
 
 export default InitializeWrapper;
