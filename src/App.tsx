@@ -12,22 +12,88 @@ const AppWrapper = styled.div`
   justify-content: center;
 `;
 
-const App = () => {
-  const [rootElement, setRootElement] = useState(null);
-  const rootElementRef = useCallback((element) => {
-    if (element !== null) {
-      setRootElement(element);
-    }
-  }, []);
+const DemoWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: 100%;
+  width: 100%;
+  position: relative;
+`;
+const onColorChange = (color: chroma.Color) => console.log(color.rgb());
+
+const useColorPickerOptions = (): [
+  string | undefined,
+  React.RefCallback<HTMLElement>
+] => {
+  const [portalTargetSelector, setPortalTargetSelector] = useState<string>();
+  const portalTargetSelectorCallbackRef =
+    useCallback<ColorPickerTypes.CallbackRefCallbackFn>(
+      (element: HTMLElement) => {
+        setPortalTargetSelector(
+          `${element.nodeName}.${Array.from(element.classList).join('.')}`
+        );
+      },
+      []
+    );
+  return [portalTargetSelector, portalTargetSelectorCallbackRef];
+};
+
+type ColorPickerOptionsProps = {
+  children: Function;
+};
+
+const ColorPickerOptions: React.FC<ColorPickerOptionsProps> = ({
+  children,
+}: ColorPickerOptionsProps) => {
+  const [portalTargetSelector, portalTargetSelectorCallbackRef]: [
+    string | undefined,
+    React.Ref<HTMLDivElement>
+  ] = useColorPickerOptions() as [
+    string | undefined,
+    React.Ref<HTMLDivElement>
+  ];
+
+  return children(portalTargetSelector, portalTargetSelectorCallbackRef);
+};
+
+const HookApp = () => {
+  const [portalTargetSelector, portalTargetSelectorCallbackRef] =
+    useColorPickerOptions() as [string | undefined, React.Ref<HTMLDivElement>];
 
   return (
-    <AppWrapper ref={rootElementRef}>
+    <AppWrapper ref={portalTargetSelectorCallbackRef}>
       <ColorPicker
-        modalContainerElement={rootElement}
+        portalTargetSelector={portalTargetSelector}
         initialColor={'mediumvioletred'}
+        onColorChange={onColorChange}
       />
     </AppWrapper>
   );
 };
 
-export default App;
+const RenderPropApp = () => (
+  <ColorPickerOptions>
+    {(
+      portalTargetSelector: string,
+      portalTargetSelectorCallbackRef: React.Ref<HTMLDivElement>
+    ) => (
+      <AppWrapper ref={portalTargetSelectorCallbackRef}>
+        <ColorPicker
+          portalTargetSelector={portalTargetSelector}
+          initialColor={'skyblue'}
+          onColorChange={onColorChange}
+        />
+      </AppWrapper>
+    )}
+  </ColorPickerOptions>
+);
+
+const Demo = () => (
+  <DemoWrapper>
+    <HookApp />
+    <RenderPropApp />
+  </DemoWrapper>
+);
+
+export default Demo;
