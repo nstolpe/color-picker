@@ -3,14 +3,9 @@ import React, { useCallback, useState } from 'react';
 import styled from '@emotion/styled';
 import chroma from 'chroma-js';
 
-import {
-  setSaturation,
-  setValue,
-  useDispatch,
-  StoreContext,
-} from 'Store/Store';
+import { setSaturationAndValue, useDispatch, StoreContext } from 'Store/Store';
 import withSelector from 'Components/withSelector';
-import { clamp } from 'Components/HueCanvas';
+import clamp from 'Utility/clamp';
 
 const PadCanvas = styled.canvas`
   display: inline-block;
@@ -39,6 +34,8 @@ const comparator = (
   ) {
     return false;
   }
+
+  return true;
 };
 
 // @TODO: make this into a class component.
@@ -57,19 +54,18 @@ const SaturationValueCanvas = ({
    * Updates the color in state and calls the color change callback.
    */
   const updateColorFromCanvasCoordinates = ({ x, y }) => {
-    const { h } = color;
+    // const { h } = color;
     const s = x / width;
     const v = 1 - y / height;
 
-    const nextColor = chroma({ h, s, v });
+    // const nextColor = chroma({ h, s, v });
 
-    dispatch(setSaturation(s));
-    dispatch(setValue(v));
-    onColorChange({
-      r: nextColor.get('rgb.r'),
-      g: nextColor.get('rgb.g'),
-      b: nextColor.get('rgb.b'),
-    });
+    dispatch(setSaturationAndValue({ s, v }));
+    // onColorChange({
+    //   r: nextColor.get('rgb.r'),
+    //   g: nextColor.get('rgb.g'),
+    //   b: nextColor.get('rgb.b'),
+    // });
   };
 
   const handlePointerDown = (event) => {
@@ -120,10 +116,10 @@ const SaturationValueCanvas = ({
 
   const handlePointerLeave = () => setHoverCoords(null);
 
-  const canvas = useCallback(
-    (cnvs) => {
-      if (cnvs && width > 0 && height > 0) {
-        const ctx = cnvs.getContext('2d');
+  const canvasRef = useCallback(
+    (canvas) => {
+      if (canvas && width > 0 && height > 0) {
+        const ctx = canvas.getContext('2d');
         const saturationGradient = ctx.createLinearGradient(0, 0, width, 0);
         const valueGradient = ctx.createLinearGradient(0, 0, 0, height);
         const { h, s, v } = color;
@@ -286,7 +282,7 @@ const SaturationValueCanvas = ({
 
   return (
     <PadCanvas
-      ref={canvas}
+      ref={canvasRef}
       width={width}
       height={height}
       isActive={isActive}
