@@ -18,6 +18,9 @@ module.exports = async () => {
       port,
     },
     devtool: 'source-map',
+    watchOptions: {
+      ignored: /node_modules/,
+    },
     module: {
       rules: [
         {
@@ -40,6 +43,7 @@ module.exports = async () => {
       alias: {
         Components: path.resolve(__dirname, 'src/components'),
         Constants: path.resolve(__dirname, 'src/constants'),
+        Hooks: path.resolve(__dirname, 'src/hooks'),
         Store: path.resolve(__dirname, 'src/store'),
         Utility: path.resolve(__dirname, 'src/utility'),
       },
