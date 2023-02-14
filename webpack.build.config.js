@@ -1,6 +1,7 @@
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 const TerserPlugin = require('terser-webpack-plugin');
+const common = require('./webpack.common.config');
 
 const { npm_package_name: name, npm_package_version: version } = process.env;
 const [, month, day, year] = new Date().toDateString().split(' ');
@@ -23,7 +24,8 @@ const banner =
 
 module.exports = () => {
   const config = {
-    entry: path.resolve(__dirname, 'src', 'components', 'ColorPicker.jsx'),
+    ...common,
+    entry: path.resolve(__dirname, 'src', 'components', 'ColorPicker.tsx'),
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'index.js',
@@ -45,41 +47,12 @@ module.exports = () => {
       ],
     },
     mode: 'none',
-    module: {
-      rules: [
-        {
-          test: /\.jsx?$/,
-          exclude: '/node_modules/',
-          loader: 'babel-loader',
-        },
-        {
-          test: /\.tsx?$/,
-          exclude: '/node_modules/',
-          loader: 'babel-loader',
-        },
-        {
-          test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
-          type: 'asset/resource',
-        },
-      ],
-    },
-    resolve: {
-      alias: {
-        Components: path.resolve(__dirname, 'src', 'components'),
-        Constants: path.resolve(__dirname, 'src/constants'),
-        Hooks: path.resolve(__dirname, 'src/hooks'),
-        Store: path.resolve(__dirname, 'src', 'store'),
-      },
-      extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      modules: [path.resolve(__dirname, 'src'), 'node_modules'],
-    },
     externals: [
       nodeExternals({
         allowlist: ['chroma-js'],
       }),
     ],
     plugins: [],
-    devtool: 'source-map',
   };
 
   return config;

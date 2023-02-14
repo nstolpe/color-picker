@@ -12,7 +12,7 @@
     "url": "https://github.com/nstolpe/color-picker"
   },
   "scripts": {
-    "start": "webpack serve --mode development --open --hot",
+    "start": "webpack serve --mode development --open --hot --config=webpack.dev.config.js",
     "prebuild": "npm run clean",
     "build": "cross-env NODE_ENV=production webpack --config=webpack.build.config.js",
     "clean": "rimraf dist",
