@@ -1,5 +1,5 @@
 // src/store/Store.js
-import React, { createContext, useReducer, useContext } from 'react';
+import React, { createContext, useEffect, useReducer, useContext } from 'react';
 import PropTypes from 'prop-types';
 import chroma from 'chroma-js';
 
@@ -68,8 +68,6 @@ export const setIsModalDragging = (isModalDragging) => ({
   data: { isModalDragging },
 });
 
-// @TODO: onColorChange needs to be added to state on mount (and if it changes)
-// then call it for SET_COLOR, SET_HUE, SET_SATURATION, SET_VALUE cases
 const reducer = (state, action) => {
   const { data, type } = action;
 
@@ -81,7 +79,7 @@ const reducer = (state, action) => {
       };
     case SET_COLOR: {
       const { onColorChange } = state;
-      onColorChange(chroma(data.color));
+
       return {
         ...state,
         color: data.color,
@@ -90,8 +88,6 @@ const reducer = (state, action) => {
     case SET_HUE: {
       const color = { ...state.color, h: data.h };
       const { onColorChange } = state;
-
-      onColorChange(chroma(color));
 
       return {
         ...state,
@@ -102,8 +98,6 @@ const reducer = (state, action) => {
       const color = { ...state.color, s: data.s };
       const { onColorChange } = state;
 
-      onColorChange(chroma(color));
-
       return {
         ...state,
         color,
@@ -113,8 +107,6 @@ const reducer = (state, action) => {
       const color = { ...state.color, s: data.s, v: data.v };
       const { onColorChange } = state;
 
-      onColorChange(chroma(color));
-
       return {
         ...state,
         color,
@@ -122,8 +114,6 @@ const reducer = (state, action) => {
     }
     case SET_VALUE: {
       const color = { ...state.color, v: data.v };
-
-      state.onColorChange(color);
 
       return {
         ...state,
@@ -148,8 +138,13 @@ const reducer = (state, action) => {
 
 const Store = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { color, onColorChange } = state;
 
-  // @TODO: This is weird. Get rid of the DispatchContextProvider.
+  useEffect(() => {
+    onColorChange(chroma(color));
+  }, [color]);
+
+  // @TODO: DispatchContextProvider is weird, get rid of it.
   return (
     <DispatchContext.Provider value={dispatch}>
       <StoreContext.Provider value={{ ...state, dispatch }}>
